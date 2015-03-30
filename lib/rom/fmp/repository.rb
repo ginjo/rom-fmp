@@ -49,6 +49,7 @@ module ROM
       #
       # @api public
       def initialize(uri, options = {})
+        #y [uri, options]
         @connection = connect(uri, options)
         @schema = connection.layouts.all.names
       end
@@ -113,7 +114,8 @@ module ROM
       #
       # @api public
       def extend_command_class(klass, dataset)
-        type = dataset.db.database_type
+        #type = dataset.db.database_type
+        type = :fmp
 
         if type == :postgres
           ext =
@@ -136,12 +138,17 @@ module ROM
       # @return [Database::Sequel] a connection instance
       #
       # @api private
-      def connect(uri, *args)
-        case uri
+      #def connect(uri, *args)
+      def connect(*args)
+        options = args.last.kind_of?(Hash) ? args.pop : Hash.new
+        options.merge! args.pop if args.last.kind_of?(Hash)
+        case args[0]
         when ::Rfm::Database
-          uri
+          args[0]
         else
-          ::Rfm.database(*Array(uri.to_s, *args).flatten)
+          #::Rfm::Database.new(uri[:database], *Array([uri.to_s, *args]).flatten)
+          #Rfm.layout(storage_name, repository.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
+          ::Rfm.database(*args, options.to_h)
         end
       end
     end

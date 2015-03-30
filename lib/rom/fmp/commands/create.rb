@@ -1,11 +1,11 @@
 require 'rom/fmp/commands'
-require 'rom/fmp/commands/transaction'
+#require 'rom/fmp/commands/transaction'
 
 module ROM
-  module SQL
+  module FMP
     module Commands
       class Create < ROM::Commands::Create
-        include Transaction
+        #include Transaction
 
         def execute(tuples)
           insert_tuples = Array([tuples]).flatten.map do |tuple|

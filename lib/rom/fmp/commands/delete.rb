@@ -1,11 +1,11 @@
 require 'rom/fmp/commands'
-require 'rom/fmp/commands/transaction'
+#require 'rom/fmp/commands/transaction'
 
 module ROM
-  module SQL
+  module FMP
     module Commands
       class Delete < ROM::Commands::Delete
-        include Transaction
+        # include Transaction
 
         def execute
           deleted = target.to_a

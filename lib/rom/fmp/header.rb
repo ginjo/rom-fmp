@@ -1,5 +1,5 @@
 module ROM
-  module SQL
+  module FMP
     # @private
     class Header
       include Equalizer.new(:columns, :table)

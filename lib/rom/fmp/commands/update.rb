@@ -1,11 +1,11 @@
 require 'rom/fmp/commands'
-require 'rom/fmp/commands/transaction'
+#require 'rom/fmp/commands/transaction'
 
 module ROM
-  module SQL
+  module FMP
     module Commands
       class Update < ROM::Commands::Update
-        include Transaction
+        #include Transaction
 
         option :original, type: Hash, reader: true
 
