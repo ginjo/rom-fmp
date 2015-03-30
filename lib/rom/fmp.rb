@@ -1,7 +1,9 @@
 require "rom/fmp/version"
+require 'rfm'
+require 'rom'
 
-module Rom
-  module Fmp
-    # Your code goes here...
+module ROM
+  module FMP
+    ConstraintError = Class.new(ROM::CommandError)
   end
 end

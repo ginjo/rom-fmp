@@ -1,11 +1,12 @@
 require 'spec_helper'
 
-describe Rom::Fmp do
+describe ROM::FMP do
   it 'has a version number' do
-    expect(Rom::Fmp::VERSION).not_to be nil
+    expect(ROM::FMP::VERSION).not_to be nil
   end
 
-  it 'does something useful' do
-    expect(false).to eq(true)
+  it 'loads ginjo-rfm gem ~> 3.0' do
+    expect(Rfm::VERSION.major).to eq('3')
+    expect(Rfm::VERSION.minor).to eq('0')
   end
 end
