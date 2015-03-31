@@ -20,12 +20,12 @@ module ROM
       # @api public
       attr_reader :schema
 
-      # @param [String,Symbol] scheme
-      #
-      # @api public
-      def self.database_file?(scheme)
-        scheme.to_s.include?('sqlite')
-      end
+      # # @param [String,Symbol] scheme
+      # #
+      # # @api public
+      # def self.database_file?(scheme)
+      #   scheme.to_s.include?('sqlite')
+      # end
 
       # SQL repository interface
       #
@@ -51,15 +51,15 @@ module ROM
       def initialize(uri, options = {})
         #y [uri, options]
         @connection = connect(uri, options)
-        @schema = connection.layouts.all.names
+        @schema = connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
       end
 
-      # Disconnect from database
-      #
-      # @api public
-      def disconnect
-        #connection.disconnect
-      end
+      # # Disconnect from database
+      # #
+      # # @api public
+      # def disconnect
+      #   #connection.disconnect
+      # end
 
       # Return dataset with the given name
       #
@@ -105,31 +105,31 @@ module ROM
         schema.include?(name)
       end
 
-      # Extend database-specific behavior
-      #
-      # @param [Class] klass command class
-      # @param [Object] dataset a dataset that will be used
-      #
-      # Note: Currently, only postgres is supported.
-      #
-      # @api public
-      def extend_command_class(klass, dataset)
-        #type = dataset.db.database_type
-        type = :fmp
-
-        if type == :postgres
-          ext =
-            if klass < Commands::Create
-              Commands::Postgres::Create
-            elsif klass < Commands::Update
-              Commands::Postgres::Update
-            end
-
-          klass.send(:include, ext) if ext
-        end
-
-        klass
-      end
+      # # Extend database-specific behavior
+      # #
+      # # @param [Class] klass command class
+      # # @param [Object] dataset a dataset that will be used
+      # #
+      # # Note: Currently, only postgres is supported.
+      # #
+      # # @api public
+      # def extend_command_class(klass, dataset)
+      #   #type = dataset.db.database_type
+      #   type = :fmp
+      # 
+      #   if type == :postgres
+      #     ext =
+      #       if klass < Commands::Create
+      #         Commands::Postgres::Create
+      #       elsif klass < Commands::Update
+      #         Commands::Postgres::Update
+      #       end
+      # 
+      #     klass.send(:include, ext) if ext
+      #   end
+      # 
+      #   klass
+      # end
 
       private
 
@@ -151,6 +151,27 @@ module ROM
           ::Rfm.database(*args, options.to_h)
         end
       end
-    end
+      
+    end # Repository
+  end # FMP
+end # ROM
+
+class ::Rfm::Layout
+  # Join two datasets
+  #
+  # @api public
+  def join(*args)
+    left, right = args.size > 1 ? args : [self, args.first]
+
+    join_map = left.each_with_object({}) { |tuple, h|
+      others = right.to_a.find_all { |t| (tuple.to_a & t.to_a).any? }
+      (h[tuple] ||= []).concat(others)
+    }
+
+    tuples = left.flat_map { |tuple|
+      join_map[tuple].map { |other| tuple.merge(other) }
+    }
+
+    self.class.new(tuples, row_proc)
   end
 end
