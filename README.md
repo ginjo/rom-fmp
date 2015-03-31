@@ -1,14 +1,15 @@
-# Rom::Fmp
+# rom-fmp
 
-TODO: Write a gem description
+A filemaker adapter for the ROM object mapping & persistence gem.
+See [rom-rb](https://github.com/rom-rb) on github or [rom-rb.org](http://rom-rb.org)
+for more information about Ruby Object Mapper.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-```ruby
-gem 'rom-fmp'
-```
+    gem 'rom-fmp'
+
 
 And then execute:
 
@@ -20,12 +21,27 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    require 'rom/fmp'
 
-## Contributing
+    DB_CONFIG = {
+      host:               'my.host.com',
+      account_name:       'my_database_user_name',
+      password:           'secret',
+      database:           'my_fmp_database',
+      ssl:                'true', 
+    }
 
-1. Fork it ( https://github.com/[my-github-username]/rom-fmp/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+    ROM.setup(:fmp, DB_CONFIG)
+
+    ROM.relation(:users)
+    ROM.commands(:users) { define(:create) }
+    ROM.mappers { define(:users) { register_as :entity; model name: 'User'; attribute :name } }
+
+    @rom = ROM.finalize.env
+    
+    create_user = @rom.commands[:users].create
+    user_mapper = @rom.mappers[:users].entity
+    create_and_map = create_user.with(name: 'Jane') >> user_mapper
+
+    puts create_and_map.call.inspect
+
