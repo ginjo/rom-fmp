@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+# YAML structure defining a SAX parsing scheme for fmresultset xml.
+# The initial object of this parse should be a new instance of Rfm::Resultset.
+# This template is intended for use with dm-filemaker-adapter, and not as
+# a general Rfm::Resultset template.
+---
+# I don't know how this would affect output.
+#attach: [private, 'ROM::FMP::Dataset', ':new', self]
+
+attach_elements: _meta
+attach_attributes: _meta
+create_accessors: all
+elements:
+- name: doctype
+  attach: none
+  attributes:
+  - name: value
+    as_name: doctype
+- name: fmresultset
+  attach: none
+- name: product
+- name: error
+  attach: none
+  before_close: :check_for_errors
+  attributes:
+  - name: code
+    as_name: error
+- name: datasource
+  attach: none
+  before_close: [object, end_datasource_element_callback, self]
+  attributes:
+  - name: total_count
+    accessor: none
+- name:  metadata
+  attach: none
+- name: field_definition
+  attach: [cursor, 'Rfm::Metadata::Field', ':allocate']
+  delimiter: name
+  attach_attributes: private
+  before_close: [object, field_definition_element_close_callback, self]
+- name: relatedset_definition
+  delimiter: table
+  as_name: portal_meta
+  attach_attributes: private
+  elements:
+  - name: field_definition
+    attach: [cursor, 'Rfm::Metadata::Field', ':allocate']
+    delimiter: name
+    as_name: field_meta
+    attach_attributes: private
+    before_close:  [object, relatedset_field_definition_element_close_callback, self]
+- name: resultset
+  attach: none
+  attributes:
+  - name: count
+    accessor: none
+  - name: fetch_size
+    accessor: none
+- name: record
+  #attach: [array, 'Rfm::Record', new, object]
+  attach: [array, 'Hash', new]
+  attach_attributes: private
+  compact: true
+  #before_close: '@loaded=true'
+  elements:
+  - name: field
+    attach: [cursor, 'Rfm::Metadata::Datum', ':allocate']
+    compact: false
+    before_close: [object, field_element_close_callback, self]
+  - name: relatedset
+    attach: [private, 'Rfm::Resultset', ':allocate']
+    as_name: portals
+    attach_attributes: private
+    create_accessors: all
+    delimiter: table
+    elements:
+    - name: record
+      attach: [default, 'Hash', ':allocate']
+      attach_attributes: private
+      #before_close: '@loaded=true'
+      elements:
+      - name: field
+        compact: true
+        attach: [cursor, 'Rfm::Metadata::Datum', ':allocate']
+        before_close: [object, portal_field_element_close_callback, self]
+

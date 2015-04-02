@@ -1,11 +1,15 @@
 require 'logger'
-
 require 'rom/repository'
 require 'rom/fmp/commands'
+require 'yaml'
+
+require 'rom/fmp/dataset'
 
 module ROM
   module FMP
     class Repository < ROM::Repository
+    	FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/dm-fmresultset.yml", __FILE__))}
+      
       # Return optionally configured logger
       #
       # @return [Object] logger
@@ -51,8 +55,18 @@ module ROM
       def initialize(uri, options = {})
         #y [uri, options]
         @connection = connect(uri, options)
-        @schema = connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
+        
       end
+      
+      # TODO: Specify Rfm::Database as a string in parser-template-yml-file
+      
+      # List available table names in repository, represented by filemaker table-occurrences.
+      #
+      # @return [Rfm::Layout] 
+      def schema
+	      # original:	connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
+	      @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
+	    end
 
       # # Disconnect from database
       # #
@@ -93,7 +107,8 @@ module ROM
       #
       # @api public
       def dataset(name)
-        connection[name]
+        FMP::Dataset.new(connection[name]) #, [])
+        #Dataset.build(connection[name], name.to_s, header)
       end
 
       # Check if dataset exists
@@ -148,7 +163,7 @@ module ROM
         else
           #::Rfm::Database.new(uri[:database], *Array([uri.to_s, *args]).flatten)
           #Rfm.layout(storage_name, repository.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
-          ::Rfm.database(*args, options.to_h)
+          ::Rfm.database(*args, options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
         end
       end
       
@@ -156,22 +171,3 @@ module ROM
   end # FMP
 end # ROM
 
-class ::Rfm::Layout
-  # Join two datasets
-  #
-  # @api public
-  def join(*args)
-    left, right = args.size > 1 ? args : [self, args.first]
-
-    join_map = left.each_with_object({}) { |tuple, h|
-      others = right.to_a.find_all { |t| (tuple.to_a & t.to_a).any? }
-      (h[tuple] ||= []).concat(others)
-    }
-
-    tuples = left.flat_map { |tuple|
-      join_map[tuple].map { |other| tuple.merge(other) }
-    }
-
-    self.class.new(tuples, row_proc)
-  end
-end

@@ -5,3 +5,6 @@ gemspec
 
 # for local dev only
 gem 'inflecto'
+
+# TODO: put this in gemspec
+gem 'charlatan'
