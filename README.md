@@ -1,6 +1,6 @@
 # rom-fmp
 
-A filemaker adapter for the ROM object mapping & persistence gem.
+A filemaker adapter for the rom-rb data mapping & persistence gem.
 See [rom-rb](https://github.com/rom-rb) on github or [rom-rb.org](http://rom-rb.org)
 for more information about Ruby Object Mapper.
 

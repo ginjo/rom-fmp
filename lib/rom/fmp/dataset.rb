@@ -4,45 +4,49 @@ require 'charlatan'
 
 module ROM
   module FMP
-    # Filemaker dataset
-    #
-    # @api public
+  
+    class Resource
+      include Enumerable
+
+      #attr_reader :connection, :path
+      attr_accessor :layout, :query
+
+      def initialize(layout, query=[])  #query=[:all, :max_records=>10])
+      	puts "RESOURCE<#{self.object_id}>#initialize with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
+        @layout = layout
+        @query = query
+      end
+
+      def each(&block)
+        #JSON.parse(connection.get(path).body).each(&block)
+        layout.send(*query).each(&block)
+      end
+      
+		  def find(*args)
+		  	self.class.new(layout, [__method__, *args])
+		  end
+      
+    end # Resource
+
     class Dataset
-    	attr_accessor :query
-      include Charlatan.new(:data, kind: Array)
-      
-      def find(*args)
-      	@query = [__method__, *args]
-      	self
+      include Charlatan.new(:data, kind: Enumerable)
+
+      def self.build(*args)
+        new(Resource.new(*args))
       end
 
-			def each(&block)
-				self.class.new(@data.send(*@query).each(&block))
-				#@data.send(*@query).each(&block)
+			def initialize(*args)
+				puts "DATASET<#{self.object_id}>#initialize with args: #{args.class} #{args.object_id}"
+			  super
 			end
-			
-			def to_a
-				#self.class.new(@data.send(*@query).to_a)
-				@data.send(*@query).to_a
-			end
-			
-      def join(*args)
-      	puts "JOINING!!!"
-        left, right = args.size > 1 ? args : [self, args.first]
-
-        join_map = left.each_with_object({}) { |tuple, h|
-          others = right.to_a.find_all { |t| (tuple.to_a & t.to_a).any? }
-          (h[tuple] ||= []).concat(others)
-        }
-
-        tuples = left.flat_map { |tuple|
-          join_map[tuple].map { |other| tuple.merge(other) }
-        }
-
-        self.class.new(tuples, row_proc)
-      end
-      
     end # Dataset
 
   end # FMP
 end # ROM
+
+class Rfm::Layout
+	def inspect
+		"#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
+	end
+
+end

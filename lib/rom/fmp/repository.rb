@@ -9,6 +9,9 @@ module ROM
   module FMP
     class Repository < ROM::Repository
     	FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/dm-fmresultset.yml", __FILE__))}
+    	
+      # WBR
+      attr_reader :resources
       
       # Return optionally configured logger
       #
@@ -55,36 +58,54 @@ module ROM
       def initialize(uri, options = {})
         #y [uri, options]
         @connection = connect(uri, options)
-        
+        @resources = {}
+        @schema = []
       end
+      
+      # WBR
+      
+	    def [](name)
+	      resources.fetch(name)
+	    end
+	
+	    def dataset(name)
+	      resources[name] = Dataset.build(connection[name.to_s])
+	    end
+	
+	    def dataset?(name)
+	      resources.key?(name)
+	    end
+      
+      
+      
       
       # TODO: Specify Rfm::Database as a string in parser-template-yml-file
-      
-      # List available table names in repository, represented by filemaker table-occurrences.
-      #
-      # @return [Rfm::Layout] 
-      def schema
-	      # original:	connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
-	      @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
-	    end
-
-      # # Disconnect from database
-      # #
-      # # @api public
-      # def disconnect
-      #   #connection.disconnect
-      # end
-
-      # Return dataset with the given name
-      #
-      # @param [String] name dataset name
-      #
-      # @return [Dataset]
-      #
-      # @api public
-      def [](name)
-        connection[name]
-      end
+			      
+			#       # List available table names in repository, represented by filemaker table-occurrences.
+			#       #
+			#       # @return [Rfm::Layout] 
+			#       def schema
+			# 	      # original:	connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
+			# 	      @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
+			# 	    end
+			# 
+			#       # # Disconnect from database
+			#       # #
+			#       # # @api public
+			#       # def disconnect
+			#       #   #connection.disconnect
+			#       # end
+			# 
+			#       # Return dataset with the given name
+			#       #
+			#       # @param [String] name dataset name
+			#       #
+			#       # @return [Dataset]
+			#       #
+			#       # @api public
+			#       def [](name)
+			#         connection[name]
+			#       end
 
       # Setup a logger
       #
@@ -99,52 +120,33 @@ module ROM
         connection.config :logger => logger
       end
 
-      # Return dataset with the given name
-      #
-      # @param [String] name a dataset name
-      #
-      # @return [Dataset]
-      #
-      # @api public
-      def dataset(name)
-        FMP::Dataset.new(connection[name]) #, [])
-        #Dataset.build(connection[name], name.to_s, header)
-      end
+			#       # Return dataset with the given name
+			#       #
+			#       # @param [String] name a dataset name
+			#       #
+			#       # @return [Dataset]
+			#       #
+			#       # @api public
+			#       def dataset(name)
+			#       	# Original, simple, not lazy.
+			#       	#connection[name]
+			#         # Lazy relations have no memory for n > 1.
+			#         #Resource.new(connection[name])
+			#         #FMP::Dataset.new(Resource.new(connection[name]))
+			#         # This was for when Dataset inherited Rfm::Layout
+			#         #connection.layouts[name] = FMP::Dataset.new(name, connection)
+			#         
+			#       end
+			# 
+			#       # Check if dataset exists
+			#       #
+			#       # @param [String] name dataset name
+			#       #
+			#       # @api public
+			#       def dataset?(name)
+			#         schema.include?(name)
+			#       end
 
-      # Check if dataset exists
-      #
-      # @param [String] name dataset name
-      #
-      # @api public
-      def dataset?(name)
-        schema.include?(name)
-      end
-
-      # # Extend database-specific behavior
-      # #
-      # # @param [Class] klass command class
-      # # @param [Object] dataset a dataset that will be used
-      # #
-      # # Note: Currently, only postgres is supported.
-      # #
-      # # @api public
-      # def extend_command_class(klass, dataset)
-      #   #type = dataset.db.database_type
-      #   type = :fmp
-      # 
-      #   if type == :postgres
-      #     ext =
-      #       if klass < Commands::Create
-      #         Commands::Postgres::Create
-      #       elsif klass < Commands::Update
-      #         Commands::Postgres::Update
-      #       end
-      # 
-      #     klass.send(:include, ext) if ext
-      #   end
-      # 
-      #   klass
-      # end
 
       private
 
