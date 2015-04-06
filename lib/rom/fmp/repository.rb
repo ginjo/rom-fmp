@@ -65,11 +65,14 @@ module ROM
       # WBR
       
 	    def [](name)
+	    	puts "REPOSITORY#[]: #{name}"
 	      resources.fetch(name)
 	    end
 	
 	    def dataset(name)
-	      resources[name] = Dataset.build(connection[name.to_s])
+	    	puts "REPOSITORY#dataset: #{name}"
+	      #resources[name] = Dataset.build(connection[name.to_s])
+	      resources[name] = connection[name]
 	    end
 	
 	    def dataset?(name)

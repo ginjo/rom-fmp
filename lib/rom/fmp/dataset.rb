@@ -11,32 +11,56 @@ module ROM
       #attr_reader :connection, :path
       attr_accessor :layout, :query
 
-      def initialize(layout, query=[])  #query=[:all, :max_records=>10])
-      	puts "RESOURCE<#{self.object_id}>#initialize with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
+      def initialize(layout, query=[:all, :max_records=>10])  #query=[:all, :max_records=>10])
+      	puts "RESOURCE#initialize<#{self.object_id}> with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
         @layout = layout
         @query = query
       end
 
-      def each(&block)
-        #JSON.parse(connection.get(path).body).each(&block)
-        layout.send(*query).each(&block)
-      end
+			def each(&block)
+			  call.each(&block)
+			end
+			
+			# def to_a
+			#   Array(call)
+			# end
+			
+			def call
+				puts "RESOURCE#call<#{self.object_id}> @query: #{@query}"
+				layout.send(*query)
+			end
       
 		  def find(*args)
-		  	self.class.new(layout, [__method__, *args])
+		  	layout.send __method__, *args
+		  	
+		  	#self.class.new(layout, [__method__, *args])
+		  	
+		  	#@layout, @query = layout, [__method__, *args]
+		  	#self
+		  	
+		  	#[self, self.class.new(layout, [__method__, *args])]
+		  	
+		  	#args
 		  end
       
     end # Resource
 
     class Dataset
-      include Charlatan.new(:data, kind: Enumerable)
+    	#include Enumerable
+      include Charlatan.new(:data, kind: Array)
 
       def self.build(*args)
+      	puts "DATASET#build<#{self.object_id}>"
         new(Resource.new(*args))
+      end
+      
+      # This is needed, otherwise charlatan returns a dataset wrapper around array returned from data.to_a.
+      def to_a
+      	data.to_a
       end
 
 			def initialize(*args)
-				puts "DATASET<#{self.object_id}>#initialize with args: #{args.class} #{args.object_id}"
+				puts "DATASET#initialize<#{self.object_id}> with args: #{args.class} #{args} #{args.object_id}"
 			  super
 			end
     end # Dataset
@@ -48,5 +72,13 @@ class Rfm::Layout
 	def inspect
 		"#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
 	end
-
+	
+	# These are for bare-bones layout-is-dataset experiment
+	def to_a
+		all(:max_records=>10)
+	end
+	
+	def each(&block)
+		all(:max_records=>10).each(&block)
+	end
 end

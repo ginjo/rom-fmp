@@ -31,10 +31,10 @@ describe 'ROM::FMP::Repository#dataset' do
   end
 
   #subject(:dataset)  { Rfm::Layout.new('layout_one', DB_CONFIG) }     #{ described_class.new(data) }
-  subject(:dataset)  { ROM::FMP::Dataset.new(layouts[0]) }     #{ described_class.new(data) }
+  subject(:dataset)  { ROM::FMP::Dataset.build(layouts[0]) }     #{ described_class.new(data) }
   
   before do
-  	allow(dataset).to receive(:get_records).and_return(data)
+  	allow_any_instance_of(Rfm::Layout).to receive(:get_records).and_return(data)
   end
 
   let(:data) do
