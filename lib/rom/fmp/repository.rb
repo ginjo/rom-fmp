@@ -1,6 +1,7 @@
 require 'logger'
 require 'rom/repository'
 require 'rom/fmp/commands'
+require 'rfm'
 require 'yaml'
 
 require 'rom/fmp/dataset'
@@ -8,7 +9,7 @@ require 'rom/fmp/dataset'
 module ROM
   module FMP
     class Repository < ROM::Repository
-    	FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/dm-fmresultset.yml", __FILE__))}
+    	FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
     	
       # WBR
       attr_reader :resources
@@ -20,21 +21,7 @@ module ROM
       # @api public
       attr_reader :logger
 
-      # Returns a list of datasets inferred from table names
-      #
-      # @return [Array] array with table names
-      #
-      # @api public
-      attr_reader :schema
-
-      # # @param [String,Symbol] scheme
-      # #
-      # # @api public
-      # def self.database_file?(scheme)
-      #   scheme.to_s.include?('sqlite')
-      # end
-
-      # SQL repository interface
+      # Filemaker repository interface
       #
       # @overload connect(uri, options)
       #   Connects to database via uri passing options
@@ -45,14 +32,14 @@ module ROM
       # @overload connect(connection)
       #   Re-uses connection instance
       #
-      #   @param [Sequel::Database] connection a connection instance
+      #   @param [Rfm::Database] connection a connection instance
       #
       # @example
-      #   repository = ROM::SQL::Repository.new('postgres://localhost/rom')
+      #   repository = ROM::FMP::Repository.new(DB_CONFIG)
       #
       #   # or reuse connection
-      #   DB = Sequel.connect('postgres://localhost/rom')
-      #   repository = ROM::SQL::Repository.new(DB)
+      #   DB = Rfm::Database.new(DB_CONFIG)
+      #   repository = ROM::FMP::Repository.new(DB)
       #
       # @api public
       def initialize(uri, options = {})
@@ -65,13 +52,17 @@ module ROM
       # WBR
       
 	    def [](name)
-	    	puts "REPOSITORY#[]: #{name}"
+	    	#puts "REPOSITORY#[]: #{name}"
 	      resources.fetch(name)
 	    end
 	
 	    def dataset(name)
-	    	puts "REPOSITORY#dataset: #{name}"
+	    	#puts "REPOSITORY#dataset: #{name}"
+	    	
+	    	# Fancy version
 	      #resources[name] = Dataset.build(connection[name.to_s])
+	      
+	      # Bare-bones version
 	      resources[name] = connection[name]
 	    end
 	
@@ -79,11 +70,26 @@ module ROM
 	      resources.key?(name)
 	    end
       
+      # Setup a logger
+      #
+      # @param [Object] logger
+      #
+      # @api public
+      def use_logger(logger)
+        @logger = logger
+        #connection.loggers << logger
+        connection.config :logger => logger
+      end      
       
       
       
-      # TODO: Specify Rfm::Database as a string in parser-template-yml-file
-			      
+			#       # Returns a list of datasets inferred from table names
+			#       #
+			#       # @return [Array] array with table names
+			#       #
+			#       # @api public
+			#       attr_reader :schema   
+			#   			      
 			#       # List available table names in repository, represented by filemaker table-occurrences.
 			#       #
 			#       # @return [Rfm::Layout] 
@@ -91,56 +97,7 @@ module ROM
 			# 	      # original:	connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
 			# 	      @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
 			# 	    end
-			# 
-			#       # # Disconnect from database
-			#       # #
-			#       # # @api public
-			#       # def disconnect
-			#       #   #connection.disconnect
-			#       # end
-			# 
-			#       # Return dataset with the given name
-			#       #
-			#       # @param [String] name dataset name
-			#       #
-			#       # @return [Dataset]
-			#       #
-			#       # @api public
-			#       def [](name)
-			#         connection[name]
-			#       end
-
-      # Setup a logger
-      #
-      # @param [Object] logger
-      #
-      # @see Sequel::Database#loggers
-      #
-      # @api public
-      def use_logger(logger)
-        @logger = logger
-        #connection.loggers << logger
-        connection.config :logger => logger
-      end
-
-			#       # Return dataset with the given name
-			#       #
-			#       # @param [String] name a dataset name
-			#       #
-			#       # @return [Dataset]
-			#       #
-			#       # @api public
-			#       def dataset(name)
-			#       	# Original, simple, not lazy.
-			#       	#connection[name]
-			#         # Lazy relations have no memory for n > 1.
-			#         #Resource.new(connection[name])
-			#         #FMP::Dataset.new(Resource.new(connection[name]))
-			#         # This was for when Dataset inherited Rfm::Layout
-			#         #connection.layouts[name] = FMP::Dataset.new(name, connection)
-			#         
-			#       end
-			# 
+			#
 			#       # Check if dataset exists
 			#       #
 			#       # @param [String] name dataset name
@@ -150,12 +107,11 @@ module ROM
 			#         schema.include?(name)
 			#       end
 
-
       private
 
       # Connect to database or reuse established connection instance
       #
-      # @return [Database::Sequel] a connection instance
+      # @return [Rfm::Database] a connection instance
       #
       # @api private
       #def connect(uri, *args)
@@ -163,12 +119,12 @@ module ROM
         options = args.last.kind_of?(Hash) ? args.pop : Hash.new
         options.merge! args.pop if args.last.kind_of?(Hash)
         case args[0]
-        when ::Rfm::Database
+        when Rfm::Database
           args[0]
         else
           #::Rfm::Database.new(uri[:database], *Array([uri.to_s, *args]).flatten)
           #Rfm.layout(storage_name, repository.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
-          ::Rfm.database(*args, options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
+          Rfm.database(*args, options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
         end
       end
       

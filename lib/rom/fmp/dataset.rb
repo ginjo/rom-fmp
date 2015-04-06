@@ -1,7 +1,24 @@
 require 'charlatan'
 
-# TODO: Same top-level dataset sticks around for unrelated calls. I don't think that is good.
+class Rfm::Layout
 
+	# Strip out unnecessary output in Rfm::Layout#inspect
+	def inspect
+		"#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
+	end
+	
+	# These are for bare-bones layout-is-dataset experiment
+	def to_a
+		all(:max_records=>10)
+	end
+	
+	def each(&block)
+		all(:max_records=>10).each(&block)
+	end
+end
+
+
+# None of this is used in bare-bones layout-is-dataset experiment
 module ROM
   module FMP
   
@@ -12,7 +29,7 @@ module ROM
       attr_accessor :layout, :query
 
       def initialize(layout, query=[:all, :max_records=>10])  #query=[:all, :max_records=>10])
-      	puts "RESOURCE#initialize<#{self.object_id}> with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
+      	#puts "RESOURCE#initialize<#{self.object_id}> with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
         @layout = layout
         @query = query
       end
@@ -26,7 +43,7 @@ module ROM
 			# end
 			
 			def call
-				puts "RESOURCE#call<#{self.object_id}> @query: #{@query}"
+				#puts "RESOURCE#call<#{self.object_id}> @query: #{@query}"
 				layout.send(*query)
 			end
       
@@ -50,7 +67,7 @@ module ROM
       include Charlatan.new(:data, kind: Array)
 
       def self.build(*args)
-      	puts "DATASET#build<#{self.object_id}>"
+      	#puts "DATASET#build<#{self.object_id}>"
         new(Resource.new(*args))
       end
       
@@ -60,7 +77,7 @@ module ROM
       end
 
 			def initialize(*args)
-				puts "DATASET#initialize<#{self.object_id}> with args: #{args.class} #{args} #{args.object_id}"
+				#puts "DATASET#initialize<#{self.object_id}> with args: #{args.class} #{args} #{args.object_id}"
 			  super
 			end
     end # Dataset
@@ -68,17 +85,3 @@ module ROM
   end # FMP
 end # ROM
 
-class Rfm::Layout
-	def inspect
-		"#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
-	end
-	
-	# These are for bare-bones layout-is-dataset experiment
-	def to_a
-		all(:max_records=>10)
-	end
-	
-	def each(&block)
-		all(:max_records=>10).each(&block)
-	end
-end
