@@ -1,6 +1,8 @@
+require 'rom/support/array_dataset'
 require 'charlatan'
 
 class Rfm::Layout
+	#include ROM::ArrayDataset
 
 	# Strip out unnecessary output in Rfm::Layout#inspect
 	def inspect
