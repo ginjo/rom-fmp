@@ -8,7 +8,7 @@ module ROM
   module FMP
     class Relation < ROM::Relation
     
-      forward :find, :all, :any, :count
+      forward :find, :where, :all, :any, :count, :to_a
 
     end
   end

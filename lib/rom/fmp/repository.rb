@@ -9,7 +9,7 @@ require 'rom/fmp/dataset'
 module ROM
   module FMP
     class Repository < ROM::Repository
-    	FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
+    	#FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
     	
       # WBR
       attr_reader :resources
@@ -63,7 +63,13 @@ module ROM
 	      #resources[name] = Dataset.build(connection[name.to_s])
 	      
 	      # Bare-bones version
-	      resources[name] = connection[name]
+	      #resources[name] = connection[name]
+	      
+	      # Influxdb version
+	      #resources[name] = Dataset.new(name, connection)
+	      
+	    	# Enlightened version
+	      resources[name] = Dataset.new(connection[name.to_s])
 	    end
 	
 	    def dataset?(name)
