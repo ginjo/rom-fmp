@@ -42,7 +42,7 @@ module ROM
 			end
     end
 
-    class Repository < ROM::Repository
+    class Repository < ROM::Gateway
       attr_reader :sets
 
       def initialize(uri, options = {})

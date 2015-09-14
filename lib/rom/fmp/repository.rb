@@ -8,7 +8,7 @@ require 'rom/fmp/dataset'
 
 module ROM
   module FMP
-    class Repository < ROM::Repository
+    class Repository < ROM::Gateway
     	#FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
     	
       # WBR
@@ -35,11 +35,11 @@ module ROM
       #   @param [Rfm::Database] connection a connection instance
       #
       # @example
-      #   repository = ROM::FMP::Repository.new(DB_CONFIG)
+      #   repository = ROM::FMP::Gateway.new(DB_CONFIG)
       #
       #   # or reuse connection
       #   DB = Rfm::Database.new(DB_CONFIG)
-      #   repository = ROM::FMP::Repository.new(DB)
+      #   repository = ROM::FMP::Gateway.new(DB)
       #
       # @api public
       def initialize(uri, options = {})

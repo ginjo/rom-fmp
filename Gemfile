@@ -5,6 +5,7 @@ gemspec
 
 # for local dev only
 gem 'inflecto'
+gem 'ginjo-rfm', :path=>'/Users/wbr/Documents/Programming/GitProjects/GinjoRfm.git/', :require=>'rfm'
 
 # TODO: put this in gemspec
 gem 'charlatan'
