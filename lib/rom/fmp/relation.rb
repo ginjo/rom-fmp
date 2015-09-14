@@ -7,9 +7,8 @@
 module ROM
   module FMP
     class Relation < ROM::Relation
-    
+      adapter :fmp
       forward :find, :where, :all, :any, :count, :to_a
-
     end
   end
 end
