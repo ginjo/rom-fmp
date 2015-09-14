@@ -31,6 +31,7 @@ Or install it yourself as:
       ssl:                'true', 
     }
 
+    ROM.use(:auto_registration)
     ROM.setup(:fmp, DB_CONFIG)
 
     ROM.relation(:users)
