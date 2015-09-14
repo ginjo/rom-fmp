@@ -11,9 +11,9 @@ describe ROM::FMP::Gateway do
     allow_any_instance_of(Rfm::Database).to receive(:layouts).and_return(result)
   end
   
-  it_behaves_like 'a rom repository' do
+  it_behaves_like 'a rom gateway' do
     let(:identifier) { :fmp }
-    let(:repository) { ROM::FMP::Gateway }
+    let(:gateway) { ROM::FMP::Gateway }
     let(:uri) { DB_CONFIG }
   end
 end

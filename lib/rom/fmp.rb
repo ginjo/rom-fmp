@@ -11,7 +11,7 @@ end
 
 require "rom/fmp/version"
 require "rom/fmp/relation"
-require "rom/fmp/repository"
+require "rom/fmp/gateway"
 #require "rom/fmp/mini"
 
 ROM.register_adapter(:fmp, ROM::FMP)

@@ -1,5 +1,5 @@
 require 'logger'
-require 'rom/repository'
+require 'rom/gateway'
 require 'rom/fmp/commands'
 require 'rfm'
 require 'yaml'
@@ -21,7 +21,7 @@ module ROM
       # @api public
       attr_reader :logger
 
-      # Filemaker repository interface
+      # Filemaker gateway interface
       #
       # @overload connect(uri, options)
       #   Connects to database via uri passing options
@@ -35,11 +35,11 @@ module ROM
       #   @param [Rfm::Database] connection a connection instance
       #
       # @example
-      #   repository = ROM::FMP::Gateway.new(DB_CONFIG)
+      #   gateway = ROM::FMP::Gateway.new(DB_CONFIG)
       #
       #   # or reuse connection
       #   DB = Rfm::Database.new(DB_CONFIG)
-      #   repository = ROM::FMP::Gateway.new(DB)
+      #   gateway = ROM::FMP::Gateway.new(DB)
       #
       # @api public
       def initialize(uri, options = {})
@@ -52,12 +52,12 @@ module ROM
       # WBR
       
 	    def [](name)
-	    	#puts "REPOSITORY#[]: #{name}"
+	    	#puts "GATEWAY#[]: #{name}"
 	      resources.fetch(name)
 	    end
 	
 	    def dataset(name)
-	    	#puts "REPOSITORY#dataset: #{name}"
+	    	#puts "GATEWAY#dataset: #{name}"
 	    	
 	    	# Fancy version
 	      #resources[name] = Dataset.build(connection[name.to_s])
@@ -96,7 +96,7 @@ module ROM
 			#       # @api public
 			#       attr_reader :schema   
 			#   			      
-			#       # List available table names in repository, represented by filemaker table-occurrences.
+			#       # List available table names in gateway, represented by filemaker table-occurrences.
 			#       #
 			#       # @return [Rfm::Layout] 
 			#       def schema
@@ -129,7 +129,7 @@ module ROM
           args[0]
         else
           #::Rfm::Database.new(uri[:database], *Array([uri.to_s, *args]).flatten)
-          #Rfm.layout(storage_name, repository.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
+          #Rfm.layout(storage_name, gateway.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
           Rfm.database(*args, options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
         end
       end

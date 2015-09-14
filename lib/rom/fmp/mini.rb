@@ -1,7 +1,7 @@
 # This is an alternative version of rom-fmp, with all moduels & classes in a single file.
 
 require 'logger'
-require 'rom/repository'
+require 'rom/gateway'
 require 'rom/fmp/commands'
 require 'rfm'
 require 'yaml'
@@ -71,7 +71,7 @@ module ROM
           args[0]
         else
           #::Rfm::Database.new(uri[:database], *Array([uri.to_s, *args]).flatten)
-          #Rfm.layout(storage_name, repository.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
+          #Rfm.layout(storage_name, gateway.adapter.options.merge(FMRESULTSET_TEMPLATE).symbolize_keys)
           Rfm.database(*args, options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
         end
       end
