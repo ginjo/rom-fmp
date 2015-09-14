@@ -1,3 +1,5 @@
+# This is an alternative version of rom-fmp, with all moduels & classes in a single file.
+
 require 'logger'
 require 'rom/repository'
 require 'rom/fmp/commands'
