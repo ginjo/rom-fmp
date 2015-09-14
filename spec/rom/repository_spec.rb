@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rom/lint/spec'
 
 # These pass!
-describe ROM::FMP::Repository do
+describe ROM::FMP::Gateway do
   let(:result){[Rfm::Layout.new('layout_one', DB_CONFIG), Rfm::Layout.new('layout_two', DB_CONFIG)]}
   before do
     allow(result).to receive(:all).and_return(result)
@@ -13,7 +13,7 @@ describe ROM::FMP::Repository do
   
   it_behaves_like 'a rom repository' do
     let(:identifier) { :fmp }
-    let(:repository) { ROM::FMP::Repository }
+    let(:repository) { ROM::FMP::Gateway }
     let(:uri) { DB_CONFIG }
   end
 end
@@ -21,7 +21,7 @@ end
 # This is really for Dataset, which doesn't exist for rom-fmp as a distinct class yet.
 # Taken from https://github.com/rom-rb/rom/blob/master/spec/unit/rom/memory/dataset_spec.rb
 # These don't pass (yet).
-describe 'ROM::FMP::Repository#dataset' do
+describe 'ROM::FMP::Gateway#dataset' do
   let(:layouts){[Rfm::Layout.new('layout_one', DB_CONFIG), Rfm::Layout.new('layout_two', DB_CONFIG)]}
   before do
     allow(layouts).to receive(:all).and_return(layouts)

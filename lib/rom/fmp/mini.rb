@@ -42,7 +42,7 @@ module ROM
 			end
     end
 
-    class Repository < ROM::Gateway
+    class Gateway < ROM::Gateway
       attr_reader :sets
 
       def initialize(uri, options = {})
@@ -76,6 +76,6 @@ module ROM
         end
       end
       
-    end # Repository
+    end # Gateway
   end # FMP
 end # ROM

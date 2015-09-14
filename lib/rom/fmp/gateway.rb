@@ -8,7 +8,7 @@ require 'rom/fmp/dataset'
 
 module ROM
   module FMP
-    class Repository < ROM::Gateway
+    class Gateway < ROM::Gateway
     	#FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
     	
       # WBR
@@ -134,7 +134,7 @@ module ROM
         end
       end
       
-    end # Repository
+    end # Gateway
   end # FMP
 end # ROM
 
