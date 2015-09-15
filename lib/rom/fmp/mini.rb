@@ -9,46 +9,21 @@ require 'yaml'
 
 module ROM
   module FMP
+  
     class Relation < ROM::Relation
+      adapter :fmp
       forward :find, :where, :all, :any, :count
     end
-
-    class Dataset
-      include Equalizer.new(:name, :connection)
-
-      attr_reader :name, :connection
-
-      def initialize(name, connection)
-        @name = name
-        @connection = connection
-      end
-
-	    def find(*args)
-	    	table.find(*args)
-	    end
-	
-	    def each(&block)
-	      table.all(:max_records=>10).each(&block)
-	    end	    
-	    
-			def to_a
-				table.all(:max_records=>10)
-			end
-			
-			private
-			
-			def table
-				@table ||= connection[name]
-			end
-    end
+    
 
     class Gateway < ROM::Gateway
       attr_reader :sets
 
       def initialize(uri, options = {})
-        #y [uri, options]
+        puts "INITIALIZING GATEWAY WITH uri: #{uri} options: #{options}"
         @connection = connect(uri, options)
         @sets = {}
+        self
       end
 
       def dataset(name)
@@ -77,5 +52,40 @@ module ROM
       end
       
     end # Gateway
+
+
+    class Dataset
+      #include Equalizer.new(:name, :connection)
+
+      attr_reader :name, :connection, :table
+
+      def initialize(name, connection)
+        puts "INITIALIZING DATASET WITH name: #{name} connection: #{connection}"
+        @name = name
+        @connection = connection
+        @table = connection[name.to_s]
+        self
+      end
+
+	    def find(*args)
+	    	table.find(*args)
+	    end
+	
+	    def each(&block)
+	      table.all(:max_records=>10).each(&block)
+	    end	    
+	    
+			def to_a
+				table.all(:max_records=>10)
+			end
+			
+			private
+			
+      # def table
+      # 	@table ||= connection[name]
+      # end
+      
+    end # Dataset
+
   end # FMP
 end # ROM

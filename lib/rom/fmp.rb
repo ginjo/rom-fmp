@@ -9,9 +9,10 @@ module ROM
   end
 end
 
-require "rom/fmp/version"
-require "rom/fmp/relation"
-require "rom/fmp/gateway"
+# require "rom/fmp/version"
+# require "rom/fmp/relation"
+# require "rom/fmp/gateway"
 #require "rom/fmp/mini"
+require "rom/fmp/micro"
 
 ROM.register_adapter(:fmp, ROM::FMP)
