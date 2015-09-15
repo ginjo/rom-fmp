@@ -14,16 +14,16 @@ module ROM
     class Gateway < ROM::Gateway
       attr_reader :datasets
       
-      def initialize(options)
-        @datasets = Rfm.database(options.to_h.merge(FMRESULTSET_TEMPLATE).to_h)
+      def initialize(*options)
+        @datasets = Rfm.database(options[0].to_h.merge(FMRESULTSET_TEMPLATE).to_h)
       end
       
       def dataset(name)
-        datasets[name]
+        datasets[name.to_s]
       end
       
       def dataset?(name)
-        datasets.layouts.key?(name)
+        datasets.layouts.key?(name.to_s)
       end
     end
   
