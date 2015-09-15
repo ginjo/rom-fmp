@@ -6,6 +6,15 @@ require 'rom/fmp/commands'
 require 'rfm'
 require 'yaml'
 
+class Rfm::Layout
+  def to_a
+    all(:max_records=>10)
+  end
+  
+  def each
+    to_a.each
+  end
+end
 
 module ROM
   module FMP
