@@ -12,7 +12,7 @@ class Rfm::Layout
   end
   
   def each
-    to_a.each
+    to_a.each(&Proc.new)
   end
 end
 
@@ -30,6 +30,9 @@ module ROM
       def dataset(name)
         datasets[name.to_s]
       end
+      
+      # This is required per lint specs
+      alias_method :[], :dataset
       
       def dataset?(name)
         datasets.layouts.key?(name.to_s)
