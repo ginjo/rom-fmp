@@ -9,8 +9,8 @@ require 'rom/fmp/dataset'
 module ROM
   module FMP
     class Gateway < ROM::Gateway
-    	#FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
-    	
+      #FMRESULTSET_TEMPLATE = {:template=>YAML.load_file(File.expand_path("../rfm/fmresultset.yml", __FILE__))}
+      
       # WBR
       attr_reader :resources
       
@@ -51,30 +51,30 @@ module ROM
       
       # WBR
       
-	    def [](name)
-	    	#puts "GATEWAY#[]: #{name}"
-	      resources.fetch(name)
-	    end
-	
-	    def dataset(name)
-	    	#puts "GATEWAY#dataset: #{name}"
-	    	
-	    	# Fancy version
-	      #resources[name] = Dataset.build(connection[name.to_s])
-	      
-	      # Bare-bones version
-	      #resources[name] = connection[name]
-	      
-	      # Influxdb version
-	      #resources[name] = Dataset.new(name, connection)
-	      
-	    	# Enlightened version
-	      resources[name] = Dataset.new(connection[name.to_s])
-	    end
-	
-	    def dataset?(name)
-	      resources.key?(name)
-	    end
+      def [](name)
+        #puts "GATEWAY#[]: #{name}"
+        resources.fetch(name)
+      end
+  
+      def dataset(name)
+        #puts "GATEWAY#dataset: #{name}"
+        
+        # Fancy version
+        #resources[name] = Dataset.build(connection[name.to_s])
+        
+        # Bare-bones version
+        #resources[name] = connection[name]
+        
+        # Influxdb version
+        #resources[name] = Dataset.new(name, connection)
+        
+        # Enlightened version
+        resources[name] = Dataset.new(connection[name.to_s])
+      end
+  
+      def dataset?(name)
+        resources.key?(name)
+      end
       
       # Setup a logger
       #
@@ -89,29 +89,29 @@ module ROM
       
       
       
-			#       # Returns a list of datasets inferred from table names
-			#       #
-			#       # @return [Array] array with table names
-			#       #
-			#       # @api public
-			#       attr_reader :schema   
-			#   			      
-			#       # List available table names in gateway, represented by filemaker table-occurrences.
-			#       #
-			#       # @return [Rfm::Layout] 
-			#       def schema
-			# 	      # original:	connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
-			# 	      @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
-			# 	    end
-			#
-			#       # Check if dataset exists
-			#       #
-			#       # @param [String] name dataset name
-			#       #
-			#       # @api public
-			#       def dataset?(name)
-			#         schema.include?(name)
-			#       end
+      #       # Returns a list of datasets inferred from table names
+      #       #
+      #       # @return [Array] array with table names
+      #       #
+      #       # @api public
+      #       attr_reader :schema   
+      #               
+      #       # List available table names in gateway, represented by filemaker table-occurrences.
+      #       #
+      #       # @return [Rfm::Layout] 
+      #       def schema
+      #         # original: connection.layouts.all.names.find_all {|n| n.to_s[/_xml$/i]}
+      #         @schema ||= connection.layouts.names.find_all {|n| n.to_s[/_xml$/i]}
+      #       end
+      #
+      #       # Check if dataset exists
+      #       #
+      #       # @param [String] name dataset name
+      #       #
+      #       # @api public
+      #       def dataset?(name)
+      #         schema.include?(name)
+      #       end
 
       private
 

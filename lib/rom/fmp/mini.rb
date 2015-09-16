@@ -67,22 +67,22 @@ module ROM
         self
       end
 
-	    def find(*args)
-	    	table.find(*args)
-	    end
-	
-	    def each(&block)
-	      table.all(:max_records=>10).each(&block)
-	    end	    
-	    
-			def to_a
-				table.all(:max_records=>10)
-			end
-			
-			private
-			
+      def find(*args)
+        table.find(*args)
+      end
+  
+      def each(&block)
+        table.all(:max_records=>10).each(&block)
+      end     
+      
+      def to_a
+        table.all(:max_records=>10)
+      end
+      
+      private
+      
       # def table
-      # 	@table ||= connection[name]
+      #   @table ||= connection[name]
       # end
       
     end # Dataset
