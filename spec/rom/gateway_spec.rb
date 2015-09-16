@@ -31,9 +31,10 @@ describe 'ROM::FMP::Gateway#dataset' do
   end
 
   # Use this when a ROM::FMP::Dataset class doesn't exist yet.
-  subject(:dataset)  { Rfm::Layout.new('layout_one', DB_CONFIG) }     #{ described_class.new(data) }
+  #subject(:dataset)  { Rfm::Layout.new('layout_one', DB_CONFIG) }     #{ described_class.new(data) }
+  
   # Use this after you develop a ROM::FMP::Dataset class
-  #subject(:dataset)  { ROM::FMP::Dataset.new(layouts[0]) }     #{ described_class.new(data) }
+  subject(:dataset)  { ROM::FMP::Dataset.new(layouts[0]) }     #{ described_class.new(data) }
   
   before do
   	allow_any_instance_of(Rfm::Layout).to receive(:get_records).and_return(data)

@@ -13,6 +13,6 @@ end
 # require "rom/fmp/relation"
 # require "rom/fmp/gateway"
 #require "rom/fmp/mini"
-require "rom/fmp/micro"
+require "rom/fmp/micro02"
 
 ROM.register_adapter(:fmp, ROM::FMP)

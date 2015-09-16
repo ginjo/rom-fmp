@@ -2,7 +2,6 @@
 
 require 'logger'
 require 'rom/gateway'
-require 'rom/fmp/commands'
 require 'rfm'
 require 'yaml'
 
