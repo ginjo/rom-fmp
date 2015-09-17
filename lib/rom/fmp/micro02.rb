@@ -57,69 +57,96 @@ module ROM
     
     
     class Dataset
+      include Rfm::Scope
       
       # Dataset instance expects to hold Array of data in @data,
       # but it will also hold a FM Layout instance.
       # If any call to Dataset instance returns Array instance,
       # it will be wrapped in a new Dataset instance.
       include Charlatan.new(:data, kind: Array)
-      attr_reader :layout, :data, :query
+      attr_reader :layout, :data, :queries
 
       # Store layout, data, query in new dataset.
-      def initialize(layout, data=[], query=[])
-        @layout = layout
-        @query = query
-        super(data)
+      def initialize(_layout, _data=[], _queries=[])
+        @layout = _layout
+        @queries = _queries
+        #puts "DATASET NEW queries:#{@queries}"
+        super(_data)
       end
+      
+      
       
       # Creates new dataset with current args and resultset. Not lazy.
       # This may not be how rom or sql uses 'where'. Find out more.
       def where(*args)
-        self.class.new(layout, layout.find(*args), args)
+        #self.class.new(layout, layout.find(*args), args)
+        get_results(:find, args)
       end
       
-      # Creates new dataset with existing data & query, plus new query
+      # Creates new dataset with existing data & queries, plus new query
       def find(*args)
-        self.class.new(layout, data, (query.dup << args))
+        #self.class.new(layout, data, (queries.dup << args))
+        wrap_data(data, (queries.dup << args))
       end
       
-      # Combines all queries, sends to FM, returns result in new dataset.
-      def call
-        compiled_query = compile
-        self.class.new(
-          layout,
-          compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compile),
-          query
-        )
+      def any(options={})
+        wrap_data(layout.any(options))
       end
       
-      # Mixes chained queries together into single query.
-      # Doesn't work with multiple-request queries.
-      # Consider mixing multi-request queries with intersection: (result1 & result2),
-      # or with the new scope feature: query1(scope:query2(scope:query3))
-      def compile
-        query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
+      def all(options={})
+        wrap_data(layout.all(options.merge({:max_records=>15})))
       end
       
-      # Triggers actual fm query.
+
+
+      # Triggers actual fm action.
       def to_a
         data.empty? ? call.data.to_a : data.to_a
       end
       
-      # Triggers actual fm query.
+      # Triggers actual fm action.
       def each
         to_a.each(&Proc.new)
       end
+
+
       
+      # Combines all queries, sends to FM, returns result in new dataset.
+      def call
+        compiled_query = compile
+        # self.class.new(
+        #   layout,
+        #   compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compiled_query),
+        #   queries
+        # )
+        wrap_data(compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compiled_query))
+      end
       
-      # #private
-    
-      # Don't expose Dataset#any
-      def any(options={})
-        self.class.new(layout, layout.any(options))
+      # Mixes chained queries together into single query.
+      # Now works with multiple-request queries (using new rfm scope feature).
+      # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
+      # or with the new scope feature: query1(scope:query2(scope:query3))
+      def compile
+        #puts "DATASET COMPILE self #{self}"
+        #puts "DATASET COMPILE queries #{queries}"
+        
+        # Old way: works but doesn't handle fmp compound queries.
+        #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
+        
+        queries.inject {|new_query,scope| apply_scope(new_query, scope)}    ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
       
       
+      
+      # Returns new dataset containing, data, layout, query.
+      def wrap_data(_data=data, _queries=queries, _layout=layout)
+        self.class.new(_layout, _data, _queries)
+      end
+      
+      # Send method & query to layout, and wrap results in new dataset.
+      def get_results(_method, query=queries, _layout=layout)
+        wrap_data(_layout.send(_method, *query), query, _layout)
+      end
 
     end # Dataset
   
