@@ -104,11 +104,23 @@ module ROM
         compiled_query ? layout.count(*compiled_query) : layout.total_count
       end
       
+      def create(args={})
+        get_results(:create, [args]) unless args.empty?
+      end
+
+      def update(record_id, args={})
+        get_results(:edit, [record_id, args]) unless args.empty?
+      end
+      
+      def delete(record_id)
+        get_results(:delete, record_id)
+      end      
+
 
 
       # Triggers actual fm action.
       def to_a
-        data.empty? ? call.data.to_a : data.to_a
+        (data.nil? || data.empty?) ? call.data.to_a : data.to_a
       end
       
       # Triggers actual fm action.
@@ -134,7 +146,8 @@ module ROM
         #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
         
         # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
-        queries.inject {|new_query,scope| apply_scope(new_query, scope)}  ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+        return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
+        queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
             
       # Returns new dataset containing, data, layout, query.
@@ -154,7 +167,7 @@ module ROM
       # we must configure adapter identifier here
       adapter :fmp
 
-      forward :find, :all, :count, :create, :edit, :delete
+      forward :find, :all, :count, :create, :update, :delete
     end
 
     
