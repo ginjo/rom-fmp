@@ -7,24 +7,6 @@ require 'charlatan'
 require 'yaml'
 
 class Rfm::Layout
-  
-  # include Charlatan.new(:data, kind: Array)
-  # 
-  # attr_reader :layout, :data, :query
-  # def initialize(layout, data=[], query=[])
-  #   @layout = layout
-  #   @query = query
-  #   super(data)
-  # end
-
-  # def to_a
-  #   all(:max_records=>10)
-  # end
-  # 
-  # def each
-  #   to_a.each(&Proc.new)
-  # end
-  
   # Strip out unnecessary output in Rfm::Layout#inspect
   def inspect
     "#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
