@@ -57,7 +57,9 @@ module ROM
     
     
     class Dataset
-      include Rfm::Scope
+      include ::Rfm::Scope
+      
+      DEFAULT_REQUEST_OPTIONS = {}
       
       # Dataset instance expects to hold Array of data in @data,
       # but it will also hold a FM Layout instance.
@@ -94,7 +96,7 @@ module ROM
       end
       
       def all(options={})
-        wrap_data(layout.all(options.merge({:max_records=>15})))
+        wrap_data(layout.all(DEFAULT_REQUEST_OPTIONS.merge(options)))
       end
       
 
@@ -119,7 +121,7 @@ module ROM
         #   compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compiled_query),
         #   queries
         # )
-        wrap_data(compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compiled_query))
+        wrap_data(compiled_query ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
       end
       
       # Mixes chained queries together into single query.
@@ -133,7 +135,7 @@ module ROM
         # Old way: works but doesn't handle fmp compound queries.
         #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
         
-        queries.inject {|new_query,scope| apply_scope(new_query, scope)}    ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+        queries.inject {|new_query,scope| apply_scope(new_query, scope)}  ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
       
       
