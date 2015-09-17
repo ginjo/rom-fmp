@@ -99,6 +99,11 @@ module ROM
         wrap_data(layout.all(DEFAULT_REQUEST_OPTIONS.merge(options)))
       end
       
+      def count(*args)
+        compiled_query = compile_query
+        compiled_query ? layout.count(*compiled_query) : layout.total_count
+      end
+      
 
 
       # Triggers actual fm action.
@@ -110,17 +115,10 @@ module ROM
       def each
         to_a.each(&Proc.new)
       end
-
-
       
       # Combines all queries, sends to FM, returns result in new dataset.
       def call
-        compiled_query = compile
-        # self.class.new(
-        #   layout,
-        #   compiled_query[0].empty? ? layout.all(:max_records=>10) : layout.find(*compiled_query),
-        #   queries
-        # )
+        compiled_query = compile_query
         wrap_data(compiled_query ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
       end
       
@@ -128,18 +126,17 @@ module ROM
       # Now works with multiple-request queries (using new rfm scope feature).
       # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
       # or with the new scope feature: query1(scope:query2(scope:query3))
-      def compile
+      def compile_query
         #puts "DATASET COMPILE self #{self}"
         #puts "DATASET COMPILE queries #{queries}"
         
         # Old way: works but doesn't handle fmp compound queries.
         #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
         
+        # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
         queries.inject {|new_query,scope| apply_scope(new_query, scope)}  ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
-      
-      
-      
+            
       # Returns new dataset containing, data, layout, query.
       def wrap_data(_data=data, _queries=queries, _layout=layout)
         self.class.new(_layout, _data, _queries)
@@ -157,7 +154,7 @@ module ROM
       # we must configure adapter identifier here
       adapter :fmp
 
-      forward :find, :all, :create, :edit, :delete
+      forward :find, :all, :count, :create, :edit, :delete
     end
 
     
