@@ -107,6 +107,7 @@ module ROM
       
       # Triggers actual fm action.
       def each
+        # passes block - if any - to upstream each.
         to_a.each(&Proc.new)
       end
       
