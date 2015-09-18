@@ -1,165 +1,121 @@
-require 'rom/support/array_dataset'
+#require 'rom/support/array_dataset'
+require 'rom'
+require 'rfm'
+require 'rom/fmp/rfm/layout'
 require 'charlatan'
 
-class Rfm::Layout
-  #include ROM::ArrayDataset
-
-  # Strip out unnecessary output in Rfm::Layout#inspect
-  def inspect
-    "#<#{self.class.name}:#{self.object_id} @name=#{self.name} @database=#{database.name} @server=#{server.host_name} @loaded=#{@loaded}>"
-  end
-
-  # # These are for bare-bones layout-is-dataset experiment
-  # def to_a
-  #   all(:max_records=>10)
-  # end
-  # 
-  # def each(&block)
-  #   all(:max_records=>10).each(&block)
-  # end
-  # 
-  # def where(*args)
-  #   find(*args)
-  # end
-end
-
-
-# None of this is used in bare-bones layout-is-dataset experiment
 module ROM
   module FMP
-  
-    #     class Resource
-    #       include Enumerable
-    # 
-    #       #attr_reader :connection, :path
-    #       attr_accessor :layout, :query
-    # 
-    #       def initialize(layout, query=[:all, :max_records=>10])  #query=[:all, :max_records=>10])
-    #         #puts "RESOURCE#initialize<#{self.object_id}> with layout: #{layout.class} #{layout.name} #{layout.object_id}, query: #{query}"
-    #         @layout = layout
-    #         @query = query
-    #       end
-    # 
-    #       def each(&block)
-    #         call.each(&block)
-    #       end
-    #       
-    #       # def to_a
-    #       #   Array(call)
-    #       # end
-    #       
-    #       def call
-    #         #puts "RESOURCE#call<#{self.object_id}> @query: #{@query}"
-    #         layout.send(*query)
-    #       end
-    #       
-    #       def find(*args)
-    #         layout.send __method__, *args
-    #         
-    #         #self.class.new(layout, [__method__, *args])
-    #         
-    #         #@layout, @query = layout, [__method__, *args]
-    #         #self
-    #         
-    #         #[self, self.class.new(layout, [__method__, *args])]
-    #         
-    #         #args
-    #       end
-    #       
-    #     end # Resource
     
-    ### After enlightenment
-    # This now works with composed relations, however the reltion 'to_a' method does not get to the dataset unless forwarded from relation.
-    # TODO: handle :all, :any, :count
-    #    
     class Dataset
+      # This was used but is not now.
+      # include Rom::ArrayDataset
+      
+      # Used to compile compound queries from chained relations.
+      include ::Rfm::Scope
+      
+      DEFAULT_REQUEST_OPTIONS = {}
+      
+      # Dataset instance expects to hold Array of data in @data,
+      # but it will also hold a FM Layout instance.
+      # If any call to Dataset instance returns Array instance,
+      # it will be wrapped in a new Dataset instance.
       include Charlatan.new(:data, kind: Array)
-      attr_reader :layout, :data, :query
+      attr_reader :layout, :data, :queries
 
-      def initialize(layout, data=[], query=[])
-        @layout = layout
-        @query = query
-        super(data)
+      # Store layout, data, query in new dataset.
+      def initialize(_layout, _data=[], _queries=[])
+        @layout = _layout
+        @queries = _queries
+        #puts "DATASET NEW queries:#{@queries}"
+        super(_data)
       end
       
+      
+      
+      # Creates new dataset with current args and resultset. Not lazy.
+      # This may not be how rom or sql uses 'where'. Find out more.
       def where(*args)
-        self.class.new(layout, layout.find(*args), args)
+        #self.class.new(layout, layout.find(*args), args)
+        get_results(:find, args)
       end
       
+      # Creates new dataset with existing data & queries, plus new query
       def find(*args)
-        self.class.new(layout, data, (query.dup << args))
+        #self.class.new(layout, data, (queries.dup << args))
+        wrap_data(data, (queries.dup << args))
       end
       
-      def call
-        self.class.new(layout, layout.find(*compile), query)
+      def any(options={})
+        wrap_data(layout.any(options))
       end
       
-      def compile
-        query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
+      def all(options={})
+        wrap_data(layout.all(DEFAULT_REQUEST_OPTIONS.merge(options)))
       end
       
+      def count(*args)
+        compiled_query = compile_query
+        compiled_query ? layout.count(*compiled_query) : layout.total_count
+      end
+      
+      def create(args={})
+        get_results(:create, [args]) unless args.empty?
+      end
+
+      def update(record_id, args={})
+        get_results(:edit, [record_id, args]) unless args.empty?
+      end
+      
+      def delete(record_id)
+        get_results(:delete, record_id)
+      end      
+
+
+
+      # Triggers actual fm action.
       def to_a
-        call.data.to_a
+        (data.nil? || data.empty?) ? call.data.to_a : data.to_a
       end
       
-      def each(&block)
-        call.data.each(&block)
+      # Triggers actual fm action.
+      def each
+        # passes block - if any - to upstream each.
+        to_a.each(&Proc.new)
+      end
+      
+      # Combines all queries, sends to FM, returns result in new dataset.
+      def call
+        compiled_query = compile_query
+        wrap_data(compiled_query ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
+      end
+      
+      # Mixes chained queries together into single query.
+      # Now works with multiple-request queries (using new rfm scope feature).
+      # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
+      # or with the new scope feature: query1(scope:query2(scope:query3))
+      def compile_query
+        #puts "DATASET COMPILE self #{self}"
+        #puts "DATASET COMPILE queries #{queries}"
+        
+        # Old way: works but doesn't handle fmp compound queries.
+        #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
+        
+        # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
+        return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
+        queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+      end
+            
+      # Returns new dataset containing, data, layout, query.
+      def wrap_data(_data=data, _queries=queries, _layout=layout)
+        self.class.new(_layout, _data, _queries)
+      end
+      
+      # Send method & query to layout, and wrap results in new dataset.
+      def get_results(_method, query=queries, _layout=layout)
+        wrap_data(_layout.send(_method, *query), query, _layout)
       end
 
     end # Dataset
-    
-    ### From influxdb adapter
-    #    
-    # class Dataset
-    #   include Equalizer.new(:name, :connection)
-    # 
-    #   attr_reader :name, :connection
-    # 
-    #   def initialize(name, connection)
-    #     @name = name.to_s
-    #     @connection = connection
-    #   end
-    #   
-    #   def where(*args)
-    #     table.find(*args)
-    #   end
-    # 
-    #   def each(&block)
-    #     table.all(:max_records=>10).each(&block)
-    #   end     
-    #   
-    #   def to_a
-    #     table.all(:max_records=>10)
-    #   end
-    #   
-    #   private
-    #   
-    #   def table
-    #     @table ||= connection[name]
-    #   end
-    # end
-    
-    ### With Charlatan
-    #     class Dataset
-    #       #include Enumerable
-    #       include Charlatan.new(:data, kind: Array)
-    # 
-    #       def self.build(*args)
-    #         #puts "DATASET#build<#{self.object_id}>"
-    #         new(Resource.new(*args))
-    #       end
-    #       
-    #       # This is needed, otherwise charlatan returns a dataset wrapper around array returned from data.to_a.
-    #       def to_a
-    #         data.to_a
-    #       end
-    # 
-    #       def initialize(*args)
-    #         #puts "DATASET#initialize<#{self.object_id}> with args: #{args.class} #{args} #{args.object_id}"
-    #         super
-    #       end
-    #     end # Dataset
-
   end # FMP
 end # ROM
-

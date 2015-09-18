@@ -1,3 +1,5 @@
+###  NOT CURRENTLY USED  ###
+
 module ROM
   module FMP
     # @private

@@ -9,11 +9,13 @@ module ROM
   end
 end
 
-# require "rom/fmp/version"
-# require "rom/fmp/relation"
-# require "rom/fmp/gateway"
+require "rom/fmp/version"
+require "rom/fmp/dataset"
+require "rom/fmp/gateway"
+require "rom/fmp/relation"
+
 #require "rom/fmp/mini"
-require "rom/fmp/micro01"
+#require "rom/fmp/micro01"
 #require "rom/fmp/micro02"
 
 ROM.register_adapter(:fmp, ROM::FMP)
