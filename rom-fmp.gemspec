@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "rom", "~> 0.9"
-  spec.add_runtime_dependency "ginjo-rfm", "~> 3.0.11.pre03"  
+  spec.add_runtime_dependency "ginjo-rfm", "~> 3.0.11"  
   spec.add_runtime_dependency "charlatan", "~> 0.1"
 
   spec.add_development_dependency "bundler"#, "~> 1.7"

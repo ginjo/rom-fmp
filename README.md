@@ -24,25 +24,37 @@ Or install it yourself as:
     require 'rom/fmp'
 
     DB_CONFIG = {
-      host:               'my.host.com',
-      account_name:       'my_database_user_name',
-      password:           'secret',
-      database:           'my_fmp_database',
-      ssl:                'true', 
+      adapter:            'fmp',
+      host:               'my.fm.server.com',
+      account_name:       'my_account',
+      password:           '12345',
+      database:           'MyFmpDatabase',  
     }
 
     ROM.use(:auto_registration)
     ROM.setup(:fmp, DB_CONFIG)
 
-    ROM.relation(:users)
-    ROM.commands(:users) { define(:create) }
-    ROM.mappers { define(:users) { register_as :entity; model name: 'User'; attribute :name } }
+    class Users < ROM::Relation[:fmp]
+      register_as :users
+      dataset :user_xml # Filemaker layout name.
 
-    @rom = ROM.finalize.env
-    
-    create_user = @rom.commands[:users].create
-    user_mapper = @rom.mappers[:users].entity
-    create_and_map = create_user.with(name: 'Jane') >> user_mapper
+      def by_login(name)
+        find(:login=>name.to_s)
+      end
 
-    puts create_and_map.call.inspect
+      def activated
+        find(:activated_at=>'>1/1/2000')
+      end
+
+    end
+
+    rom_env = ROM.finalize.env
+
+    rom_users_relation = rom_env.relation(:users)
+
+    activated_users_by_login = rom_users_relation.activated.by_login
+
+    activated_users_by_login.call('bill').to_a
+    activated_users_by_login.('bill').to_a
+    activated_users_by_login['bill'].to_a
 
