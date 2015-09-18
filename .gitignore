@@ -12,7 +12,7 @@
 *.o
 *.a
 mkmf.log
-/vendor
+/vendor/
 .ruby-version
 example*.rb
 local_testing

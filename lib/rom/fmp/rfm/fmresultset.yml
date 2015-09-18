@@ -59,7 +59,7 @@ elements:
 - name: record
   #attach: [array, 'Rfm::Record', new, object]
   attach: [array, 'Hash', new]
-  attach_attributes: private
+  attach_attributes: hash
   compact: true
   #before_close: '@loaded=true'
   elements:

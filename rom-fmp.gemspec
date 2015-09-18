@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["wbr"]
   spec.email         = ["wbr@mac.com"]
   spec.summary       = %q{Filemaker adapter for rom-rb}
-  spec.description   = %q{Allows ROM to use Filemaker Server as a datastore}
+  spec.description   = %q{FileMaker adapter for Ruby Object Mapper - ROM}
   spec.homepage      = ""
   spec.license       = "MIT"
 
