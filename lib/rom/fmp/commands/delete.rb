@@ -7,12 +7,10 @@ module ROM
       class Delete < ROM::Commands::Delete
         adapter :fmp
 
-        def execute(record_id=nil)          
-          if record_id
-            source.delete(record_id)
-          else
-            relation.each { |tuple| source.delete(tuple['record_id']) }
-          end
+        def execute   
+          # TODO: make this like Update, so returns updated data,
+          # and works with loaded relations.       
+          relation.each { |tuple| source.delete(tuple['record_id']) }
         end
         
       end

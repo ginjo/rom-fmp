@@ -8,11 +8,9 @@ module ROM
         adapter :fmp
 
         def execute(*tuples)
+          # TODO: make this like Update, so returns updated data,
+          # and works with loaded relations.
           tuples.flatten(1).each { |tuple| relation.create(tuple) }
-          
-        # This is from sql adapter
-        rescue *ERRORS => e
-          raise ConstraintError, e.message
         end
 
       end

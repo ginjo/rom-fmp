@@ -60,20 +60,22 @@ module ROM
       end
       
       def create(attributes={})
-        puts "Would create #{record_id} with #{attributes}\n"
-        #get_results(:create, [attributes]) unless attributes.empty?
+        puts "Would create #{record_id} with #{attributes}, but instead will just find\n"
+        #get_results(:create, [attributes])
         get_results(:any)
       end
 
-      def update(record_id, attributes={})
-        puts "Would update #{record_id} with #{attributes}\n"
-        #get_results(:edit, [record_id, attributes]) unless attributes.empty?
-        get_result(:find, record_id)
+      def update(*args)
+        attributes = args.last.is_a?(Hash) ? args.pop : {}
+        record_id = args[0] || [:id, :record_id, 'id', 'record_id'].find {|x| attributes.delete(x)}
+        puts "Would update #{record_id} with #{attributes}, but instead will just find\n"
+        #get_results(:edit, [record_id, attributes])
+        get_results(:find, record_id)
       end
 
       
       def delete(record_id)
-        puts "Would delete #{record_id}\n"
+        puts "Would delete #{record_id}, but instead will just find\n"
         #get_results(:delete, record_id)
         get_results(:find, record_id)
       end      

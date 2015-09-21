@@ -7,15 +7,13 @@ module ROM
       class Update < ROM::Commands::Update
         adapter :fmp
 
-        def execute(*args)
-          attributes = args.last.is_a?(Hash) ? args.pop : {}
-          record_id = args[0] || [:id, :record_id, 'id', 'record_id'].find {|x| attributes.delete(x)}
-          
-          if record_id
-            source.update(record_id, attributes)
-          else
-            relation.each { |tuple| source.update(tuple['record_id'], attributes) }
-          end
+        def execute(attributes)
+          # Replaces relation collection with updated records.
+          # The 'relation.source.update' is to handle loaded relations.
+          new_collection=[]
+          relation.each { |tuple| new_collection << relation.source.update(tuple['record_id'], attributes).one }
+          relation.collection.replace(new_collection)
+          relation
         end
         
       end

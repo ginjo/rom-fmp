@@ -12,6 +12,16 @@ module ROM
       adapter :fmp
 
       forward :find, :all, :count, :create, :update, :delete
+      
+      # Added to help commands on loaded relations,
+      # but is not currently used.
+      #
+      # def collect
+      #   out=[]
+      #   each {|x| out << yield(x)}
+      #   out
+      # end
+      # alias_method :map, :collect
     end
     
   end
