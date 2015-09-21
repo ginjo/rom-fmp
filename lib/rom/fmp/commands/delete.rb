@@ -5,12 +5,14 @@ module ROM
   module FMP
     module Commands
       class Delete < ROM::Commands::Delete
+        include InstanceMethods
+        
         adapter :fmp
 
         def execute   
           # TODO: make this like Update, so returns updated data,
           # and works with loaded relations.       
-          relation.each { |tuple| source.delete(tuple['record_id']) }
+          relation.map { |tuple| callable_relation.delete(tuple['record_id']).one }
         end
         
       end

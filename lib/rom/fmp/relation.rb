@@ -15,13 +15,12 @@ module ROM
       
       # Added to help commands on loaded relations,
       # but is not currently used.
-      #
-      # def collect
-      #   out=[]
-      #   each {|x| out << yield(x)}
-      #   out
-      # end
-      # alias_method :map, :collect
+      
+      def map
+        out=[]
+        each {|x| out << yield(x)}
+        out
+      end
     end
     
   end

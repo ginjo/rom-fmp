@@ -60,9 +60,9 @@ module ROM
       end
       
       def create(attributes={})
-        puts "Would create #{record_id} with #{attributes}, but instead will just find\n"
+        puts "Would create #{layout.name} with #{attributes}, but instead will just find\n"
         #get_results(:create, [attributes])
-        get_results(:any)
+        get_results(:any, {})
       end
 
       def update(*args)
@@ -73,7 +73,6 @@ module ROM
         get_results(:find, record_id)
       end
 
-      
       def delete(record_id)
         puts "Would delete #{record_id}, but instead will just find\n"
         #get_results(:delete, record_id)
@@ -122,6 +121,7 @@ module ROM
       
       # Send method & query to layout, and wrap results in new dataset.
       def get_results(_method, query=queries, _layout=layout)
+        puts "Dataset#get_results method: #{_method}, query: #{query}, layout: #{layout}"
         wrap_data(_layout.send(_method, *query), query, _layout)
       end
 
