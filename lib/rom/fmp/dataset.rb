@@ -1,4 +1,4 @@
-#require 'rom/support/array_dataset'
+require 'rom/support/array_dataset'
 require 'rom'
 require 'rfm'
 require 'rom/fmp/rfm/layout'
@@ -9,7 +9,10 @@ module ROM
     
     class Dataset
       # This was used but is not now.
-      # include Rom::ArrayDataset
+      #include ArrayDataset
+      
+      # TODO: Find out why datasets never have @data, and why loaded relations have datasets that are not @loaded.
+      # Is @loaded even a ROM attribute? Or is it just my own creation?
       
       # Used to compile compound queries from chained relations.
       include ::Rfm::Scope
@@ -24,10 +27,15 @@ module ROM
       attr_reader :layout, :data, :queries
 
       # Store layout, data, query in new dataset.
+      # Why data & queries? ROM doesn't appear to be using those,
+      # yet the linter insists on them.
       def initialize(_layout, _data=[], _queries=[])
+        # puts "DATASET NEW LAYOUT #{_layout}"
+        # puts "DATASET NEW DATA #{_data}"
+        # puts "DATASET NEW QUERIES #{_queries}"
         @layout = _layout
         @queries = _queries
-        #puts "DATASET NEW queries:#{@queries}"
+        # Linter insists on this too.
         super(_data)
       end
       
@@ -114,7 +122,7 @@ module ROM
         queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
             
-      # Returns new dataset containing, data, layout, query.
+      # Returns new dataset containing data, layout, query.
       def wrap_data(_data=data, _queries=queries, _layout=layout)
         self.class.new(_layout, _data, _queries)
       end
@@ -122,7 +130,13 @@ module ROM
       # Send method & query to layout, and wrap results in new dataset.
       def get_results(_method, query=queries, _layout=layout)
         puts "Dataset#get_results method: #{_method}, query: #{query}, layout: #{layout}"
-        wrap_data(_layout.send(_method, *query), query, _layout)
+        
+        # This works just as well as the next one.
+        #wrap_data(_layout.send(_method, *query), query, _layout)
+        
+        # This doesn't seem to add anything (even data!) to the objects operated on or created.
+        @data = _layout.send(_method, *query)
+        wrap_data(@data, query, _layout)
       end
 
     end # Dataset
