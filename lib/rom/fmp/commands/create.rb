@@ -5,24 +5,16 @@ module ROM
   module FMP
     module Commands
       class Create < ROM::Commands::Create
-        #include Transaction
+        adapter :fmp
 
-        def execute(tuples)
-          insert_tuples = Array([tuples]).flatten.map do |tuple|
-            attributes = input[tuple]
-            validator.call(attributes)
-            attributes.to_h
-          end
-
-          insert(insert_tuples)
+        def execute(*tuples)
+          tuples.flatten(1).each { |tuple| relation.create(tuple) }
+          
+        # This is from sql adapter
         rescue *ERRORS => e
           raise ConstraintError, e.message
         end
 
-        def insert(tuples)
-          pks = tuples.map { |tuple| relation.insert(tuple) }
-          relation.where(relation.primary_key => pks)
-        end
       end
     end
   end

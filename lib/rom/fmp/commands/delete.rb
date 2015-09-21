@@ -5,13 +5,16 @@ module ROM
   module FMP
     module Commands
       class Delete < ROM::Commands::Delete
-        # include Transaction
+        adapter :fmp
 
-        def execute
-          deleted = target.to_a
-          target.delete
-          deleted
+        def execute(record_id=nil)          
+          if record_id
+            source.delete(record_id)
+          else
+            relation.each { |tuple| source.delete(tuple['record_id']) }
+          end
         end
+        
       end
     end
   end

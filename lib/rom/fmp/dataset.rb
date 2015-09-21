@@ -59,16 +59,23 @@ module ROM
         compiled_query ? layout.count(*compiled_query) : layout.total_count
       end
       
-      def create(args={})
-        get_results(:create, [args]) unless args.empty?
+      def create(attributes={})
+        puts "Would create #{record_id} with #{attributes}\n"
+        #get_results(:create, [attributes]) unless attributes.empty?
+        get_results(:any)
       end
 
-      def update(record_id, args={})
-        get_results(:edit, [record_id, args]) unless args.empty?
+      def update(record_id, attributes={})
+        puts "Would update #{record_id} with #{attributes}\n"
+        #get_results(:edit, [record_id, attributes]) unless attributes.empty?
+        get_result(:find, record_id)
       end
+
       
       def delete(record_id)
-        get_results(:delete, record_id)
+        puts "Would delete #{record_id}\n"
+        #get_results(:delete, record_id)
+        get_results(:find, record_id)
       end      
 
 

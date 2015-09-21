@@ -5,49 +5,19 @@ module ROM
   module FMP
     module Commands
       class Update < ROM::Commands::Update
-        #include Transaction
+        adapter :fmp
 
-        option :original, type: Hash, reader: true
-
-        alias_method :to, :call
-
-        def execute(tuple)
-          attributes = input[tuple]
-          validator.call(attributes)
-
-          changed = diff(attributes.to_h)
-
-          if changed.any?
-            update(changed)
+        def execute(*args)
+          attributes = args.last.is_a?(Hash) ? args.pop : {}
+          record_id = args[0] || [:id, :record_id, 'id', 'record_id'].find {|x| attributes.delete(x)}
+          
+          if record_id
+            source.update(record_id, attributes)
           else
-            []
+            relation.each { |tuple| source.update(tuple['record_id'], attributes) }
           end
         end
-
-        def change(original)
-          self.class.new(relation, options.merge(original: original))
-        end
-
-        def update(tuple)
-          pks = relation.map { |t| t[primary_key] }
-          dataset = relation.dataset
-          dataset.update(tuple)
-          dataset.unfiltered.where(primary_key => pks).to_a
-        end
-
-        def primary_key
-          relation.primary_key
-        end
-
-        private
-
-        def diff(tuple)
-          if original
-            Hash[tuple.to_a - (tuple.to_a & original.to_a)]
-          else
-            tuple
-          end
-        end
+        
       end
     end
   end

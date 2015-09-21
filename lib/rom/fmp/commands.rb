@@ -6,8 +6,8 @@ module ROM
   module FMP
     module Commands
       ERRORS = [
-        # Sequel::UniqueConstraintViolation,
-        # Sequel::NotNullConstraintViolation
+        FMP::ConstraintError
+        #Sequel::NotNullConstraintViolation
       ].freeze
     end
   end
