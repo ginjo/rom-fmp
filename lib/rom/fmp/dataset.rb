@@ -15,7 +15,7 @@ module ROM
       # Is @loaded even a ROM attribute? Or is it just my own creation?
       
       # Used to compile compound queries from chained relations.
-      include ::Rfm::Scope
+      extend ::Rfm::Scope
       
       DEFAULT_REQUEST_OPTIONS = {}
       
@@ -25,6 +25,31 @@ module ROM
       # it will be wrapped in a new Dataset instance.
       include Charlatan.new(:data, kind: Array)
       attr_reader :layout, :data, :queries
+      
+      # Is now in Rfm::Scope      
+      # def self.delineate_query(*request)
+      #   options = (request.last.is_a?(Hash) && request.size > 1) ? request.pop : {}
+      #   query = request.pop || {}
+      #   action = request.pop || (query.size==0 ? :all : :find)
+      #   [action, query, options]
+      # end
+
+      # Mixes chained queries together into single query.
+      # Now works with multiple-request queries (using new rfm scope feature).
+      # NOTE: Each query must be an array representing a full rfm request.
+      # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
+      # or with the new scope feature: query1(scope:query2(scope:query3))
+      def self.compile_query(queries)
+        puts "DATASET COMPILE QUERIES #{queries}"
+        
+        # Old way: works but doesn't handle fmp compound queries.
+        #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
+        
+        # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
+        return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
+        queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+      end      
+      
 
       # Store layout, data, query in new dataset.
       # Why data & queries? ROM doesn't appear to be using those,
@@ -41,13 +66,6 @@ module ROM
       
       
       
-      # Creates new dataset with current args and resultset. Not lazy.
-      # This may not be how rom or sql uses 'where'. Find out more.
-      def where(*args)
-        #self.class.new(layout, layout.find(*args), args)
-        get_results(:find, args)
-      end
-      
       # Creates new dataset with existing data & queries, plus new query
       def find(*args)
         #self.class.new(layout, data, (queries.dup << args))
@@ -63,7 +81,7 @@ module ROM
       end
       
       def count(*args)
-        compiled_query = compile_query
+        compiled_query = self.class.compile_query(queries)
         compiled_query ? layout.count(*compiled_query) : layout.total_count
       end
       
@@ -102,24 +120,8 @@ module ROM
       
       # Combines all queries, sends to FM, returns result in new dataset.
       def call
-        compiled_query = compile_query
+        compiled_query = self.class.compile_query(queries)
         wrap_data(compiled_query ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
-      end
-      
-      # Mixes chained queries together into single query.
-      # Now works with multiple-request queries (using new rfm scope feature).
-      # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
-      # or with the new scope feature: query1(scope:query2(scope:query3))
-      def compile_query
-        #puts "DATASET COMPILE self #{self}"
-        #puts "DATASET COMPILE queries #{queries}"
-        
-        # Old way: works but doesn't handle fmp compound queries.
-        #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
-        
-        # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
-        return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
-        queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
       end
             
       # Returns new dataset containing data, layout, query.
