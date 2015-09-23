@@ -19,13 +19,12 @@ module ROM
       
       DEFAULT_REQUEST_OPTIONS = {}
       
-      # Calls to dataset that get forwarded, and return
-      # the same class type as @data, or are of kind Array,
-      # will be automatically wrapped in Dataset.
-      # NOTE: @data can be either a layout or a resultset.
+      # Dataset instance expects to hold Array of data in @data,
+      # but it will also hold a FM Layout instance.
+      # If any call to Dataset instance returns Array instance,
+      # it will be wrapped in a new Dataset instance.
       include Charlatan.new(:data, kind: Array)
-      attr_reader :queries
-      alias_method :layout, :data
+      attr_reader :layout, :data, :queries
       
       # Is now in Rfm::Scope      
       # def self.delineate_query(*request)
@@ -57,12 +56,14 @@ module ROM
       # Store layout, data, query in new dataset.
       # Why data & queries? ROM doesn't appear to be using those,
       # yet the linter insists on them.
-      def initialize(_layout, _queries=[])
+      def initialize(_layout, _data=[], _queries=[])
         # puts "DATASET NEW LAYOUT #{_layout}"
+        # puts "DATASET NEW DATA #{_data}"
         # puts "DATASET NEW QUERIES #{_queries}"
+        @layout = _layout
         @queries = _queries
-        # Super is necessary for Charlatan to work.
-        super(_layout)
+        # Linter insists on this too.
+        super(_data)
       end
       
       
@@ -110,7 +111,7 @@ module ROM
 
       # Triggers actual fm action.
       def to_a
-        (data.is_a?(::Rfm::Layout) || data.empty?) ? call.data.to_a : data.to_a
+        (data.nil? || data.empty?) ? call.data.to_a : data.to_a
       end
       
       # Triggers actual fm action.
@@ -130,7 +131,7 @@ module ROM
         #puts "Dataset#get_results self: #{self} method: #{_method}, query: #{query}, layout: #{layout}"
         
         # This works just as well as the next one.
-        wrap_data(_layout.send(_method, *query), query)
+        wrap_data(_layout.send(_method, *query), query, _layout)
         
         # Lingering @data might be causing problems with 2+n calls to commands.
         #@data = _layout.send(_method, *query)
@@ -138,8 +139,8 @@ module ROM
       end
             
       # Returns new dataset containing data, layout, query.
-      def wrap_data(_data=data, _queries=queries)
-        self.class.new(_data, _queries)
+      def wrap_data(_data=data, _queries=queries, _layout=layout)
+        self.class.new(_layout, _data, _queries)
       end
       
     end # Dataset
