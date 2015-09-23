@@ -11,8 +11,8 @@ module ROM
       # This was used but is not now.
       #include ArrayDataset
       
-      # TODO: Find out why datasets never have @data, and why loaded relations have datasets that are not @loaded.
-      # Is @loaded even a ROM attribute? Or is it just my own creation?
+      # TODO: Find out why datasets never have @data or @loaded.
+      # Is @loaded even a ROM attribute? Or is it just my own creation? Answer: @loaded is part of the rfm layout or database object.
       
       # Used to compile compound queries from chained relations.
       extend ::Rfm::Scope
@@ -40,14 +40,16 @@ module ROM
       # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
       # or with the new scope feature: query1(scope:query2(scope:query3))
       def self.compile_query(queries)
-        puts "DATASET COMPILE QUERIES #{queries}"
+        puts "DATASET COMPILE QUERIES input:#{queries}"
         
         # Old way: works but doesn't handle fmp compound queries.
         #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
         
         # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
         return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
-        queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+        rslt = queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
+        puts "DATASET COMPILE QUERIES output:#{rslt}"
+        rslt
       end      
       
 

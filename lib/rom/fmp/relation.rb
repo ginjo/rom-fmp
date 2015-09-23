@@ -13,9 +13,7 @@ module ROM
 
       forward :find, :all, :count, :create, :update, :delete
       
-      # Added to help commands on loaded relations,
-      # but is not currently used.
-      
+      # Added to help commands on loaded relations,      
       def map
         out=[]
         each {|x| out << yield(x)}
