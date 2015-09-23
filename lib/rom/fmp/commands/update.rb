@@ -10,7 +10,6 @@ module ROM
         adapter :fmp
         
         def execute(attributes)
-          #new_collection=[]
           # puts "Update#execute SELF:"
           # puts self.inspect
           # puts "Update#execute RELATION:"
@@ -19,9 +18,7 @@ module ROM
           # puts relation.source.inspect rescue $!
           # puts "Update#execute SOURCE:"
           # puts source.inspect rescue $!
-          # puts "Update#execute SOURCE RELATION:"
-          # puts source.relation.inspect rescue $!
-          relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes).one}.to_a
+          relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes).one }
         end
         
       end

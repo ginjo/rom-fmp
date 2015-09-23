@@ -40,16 +40,16 @@ module ROM
       # Other ways: consider mixing multi-request queries with intersection: (result1 & result2),
       # or with the new scope feature: query1(scope:query2(scope:query3))
       def self.compile_query(queries)
-        puts "DATASET COMPILE QUERIES input:#{queries}"
+        #puts "DATASET COMPILE QUERIES input:#{queries}"
         
         # Old way: works but doesn't handle fmp compound queries.
         #query.each_with_object([{},{}]){|x,o| o[0].merge!(x[0] || {}); o[1].merge!(x[1] || {})}
         
         # New way: handles compound queries. Reqires ginjo-rfm 3.0.11.
-        return unless queries  # This should help introspecting dataset that results from record deletion. TODO: test this.
-        rslt = queries.inject {|new_query,scope| apply_scope(new_query, scope)} ##puts "SCOPE INJECTION scope:#{scope} new_query:#{new_query}"; 
-        puts "DATASET COMPILE QUERIES output:#{rslt}"
-        rslt
+        return [] unless queries.any?  # This should help introspecting dataset that results from record deletion. TODO: test this.
+        rslt = queries.inject {|new_query,scope| apply_scope(new_query, scope)}
+        #puts "DATASET COMPILE QUERIES output:#{rslt}"
+        #rslt
       end      
       
 
@@ -84,7 +84,7 @@ module ROM
       
       def count(*args)
         compiled_query = self.class.compile_query(queries)
-        compiled_query ? layout.count(*compiled_query) : layout.total_count
+        compiled_query.any? ? layout.count(*compiled_query) : layout.total_count
       end
       
       def create(attributes={})
@@ -123,7 +123,19 @@ module ROM
       # Combines all queries, sends to FM, returns result in new dataset.
       def call
         compiled_query = self.class.compile_query(queries)
-        wrap_data(compiled_query ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
+        wrap_data(compiled_query.any? ? layout.find(*compiled_query) : layout.all(DEFAULT_REQUEST_OPTIONS))
+      end
+      
+      # Send method & query to layout, and wrap results in new dataset.
+      def get_results(_method, query=queries, _layout=layout)
+        #puts "Dataset#get_results self: #{self} method: #{_method}, query: #{query}, layout: #{layout}"
+        
+        # This works just as well as the next one.
+        wrap_data(_layout.send(_method, *query), query, _layout)
+        
+        # Lingering @data might be causing problems with 2+n calls to commands.
+        #@data = _layout.send(_method, *query)
+        #wrap_data(@data, query, _layout)
       end
             
       # Returns new dataset containing data, layout, query.
@@ -131,18 +143,6 @@ module ROM
         self.class.new(_layout, _data, _queries)
       end
       
-      # Send method & query to layout, and wrap results in new dataset.
-      def get_results(_method, query=queries, _layout=layout)
-        puts "Dataset#get_results method: #{_method}, query: #{query}, layout: #{layout}"
-        
-        # This works just as well as the next one.
-        #wrap_data(_layout.send(_method, *query), query, _layout)
-        
-        # This doesn't seem to add anything (even data!) to the objects operated on or created.
-        @data = _layout.send(_method, *query)
-        wrap_data(@data, query, _layout)
-      end
-
     end # Dataset
   end # FMP
 end # ROM
