@@ -60,7 +60,7 @@ module ROM
       def initialize(_layout, _queries=[])
         # puts "DATASET NEW LAYOUT #{_layout}"
         # puts "DATASET NEW QUERIES #{_queries}"
-        @queries = _queries
+        @queries = [_queries].flatten(1)  # Flatten in case you pass in a string.
         # Super is necessary for Charlatan to work.
         super(_layout)
       end

@@ -10,6 +10,9 @@ module ROM
         adapter :fmp
         
         def execute(attributes)
+        
+          # Original scheme: returns array. Uses old callable_relation. Processing done in command (here).
+          #
           # puts "Update#execute SELF:"
           # puts self.inspect
           # puts "Update#execute RELATION:"
@@ -18,7 +21,27 @@ module ROM
           # puts relation.source.inspect rescue $!
           # puts "Update#execute SOURCE:"
           # puts source.inspect rescue $!
-          relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes).one }
+          #relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes) }
+          
+          # Newest scheme: returns loaded relation. Uses newer callable_realtion. Processing done in relation.
+          callable_relation.update(attributes)
+          
+          # Newer (middle) scheme. Returns source relation with loaded dataset. Uses newer callable_relation. Processing done in command.
+          # relation.inject(Dataset.new([])) do |initial, tuple|
+          #   new_relation = callable_relation.update(tuple['record_id'], attributes)
+          #   new_dataset = new_relation.dataset
+          #   new_queries = new_dataset.queries
+          #   initial_dataset = initial.respond_to?(:dataset) ? initial.dataset : initial
+          #   initial_queries = initial_dataset.respond_to?(:queries) ? initial_dataset.queries : []
+          #   puts "NEW_DATASET #{new_dataset}"
+          #   puts "NEW_QUERIES #{new_queries}"
+          #   puts "INITIAL_DATASET #{initial_dataset}"
+          #   puts "INITIAL_QUERIES #{initial_queries}"
+          #   
+          #   new_dataset.data.concat initial_dataset.data
+          #   new_queries.concat initial_queries
+          #   new_relation
+          # end
         end
         
       end
