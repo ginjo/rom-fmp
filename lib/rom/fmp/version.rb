@@ -1,5 +1,5 @@
 module ROM
   module FMP
-    VERSION = "0.0.5.pre5"
+    VERSION = "0.0.5.pre6"
   end
 end

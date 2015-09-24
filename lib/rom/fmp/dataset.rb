@@ -26,14 +26,8 @@ module ROM
       include Charlatan.new(:data, kind: Array)
       attr_reader :queries
       alias_method :layout, :data
-      
-      # Is now in Rfm::Scope      
-      # def self.delineate_query(*request)
-      #   options = (request.last.is_a?(Hash) && request.size > 1) ? request.pop : {}
-      #   query = request.pop || {}
-      #   action = request.pop || (query.size==0 ? :all : :find)
-      #   [action, query, options]
-      # end
+
+
 
       # Mixes chained queries together into single query.
       # Now works with multiple-request queries (using new rfm scope feature).
@@ -54,6 +48,7 @@ module ROM
       end      
       
 
+
       # Store layout, data, query in new dataset.
       # Why data & queries? ROM doesn't appear to be using those,
       # yet the linter insists on them.
@@ -65,8 +60,6 @@ module ROM
         super(_layout)
       end
       
-      
-      
       # Creates new dataset with existing data & queries, plus new query
       def find(*args)
         #self.class.new(layout, data, (queries.dup << args))
@@ -77,9 +70,10 @@ module ROM
         wrap_data(layout.any(options))
       end
       
-      def all(options={})
+      def all(options)
         wrap_data(layout.all(DEFAULT_REQUEST_OPTIONS.merge(options)))
       end
+      private :all
       
       def count(*args)
         compiled_query = self.class.compile_query(queries)
@@ -105,6 +99,7 @@ module ROM
         #get_results(:delete, record_id)
         get_results(:find, record_id)
       end      
+
 
 
 
