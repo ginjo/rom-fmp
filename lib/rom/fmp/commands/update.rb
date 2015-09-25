@@ -11,6 +11,13 @@ module ROM
         
         def execute(attributes)
         
+          # Returns an instance of ROM::Relation::Loaded with:
+          # source: a dataset containing all fmp resultsets from the operation.
+          # collection: a dataset containing resultset records from the operation.
+          # The result of this does not respond to :as. Use the >> method for piping results to a mapper.
+          new_dataset = Dataset.new([]).concat(map{|tuple| callable_relation.dataset.update(tuple['record_id'], attributes).data})
+          ROM::Relation::Loaded.new(new_dataset, new_dataset.map{|resultset| resultset.to_a}.flatten(1).to_a)
+        
           # Original scheme: returns array. Uses old callable_relation. Processing done in command (here).
           #
           # puts "Update#execute SELF:"
@@ -24,7 +31,7 @@ module ROM
           #relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes) }
           
           # Newest scheme: returns loaded relation. Uses newer callable_realtion. Processing done in relation.
-          callable_relation.update(attributes)
+          #callable_relation.update(attributes)
           
           # Newer (middle) scheme. Returns source relation with loaded dataset. Uses newer callable_relation. Processing done in command.
           # relation.inject(Dataset.new([])) do |initial, tuple|
