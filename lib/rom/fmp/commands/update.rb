@@ -11,6 +11,10 @@ module ROM
         
         def execute(attributes)
         
+          # Scheme 04: moves update logic into command, and makes
+          # the command object the gateway to the dataset (instead of the relation being the gateway).
+          # This works ok, but maybe not any better than scheme 03.
+          #
           # Returns an instance of ROM::Relation::Loaded with:
           # source: a dataset containing all fmp resultsets from the operation.
           # collection: a dataset containing resultset records from the operation.
@@ -18,7 +22,7 @@ module ROM
           new_dataset = Dataset.new([]).concat(map{|tuple| callable_relation.dataset.update(tuple['record_id'], attributes).data})
           ROM::Relation::Loaded.new(new_dataset, new_dataset.map{|resultset| resultset.to_a}.flatten(1).to_a)
         
-          # Original scheme: returns array. Uses old callable_relation. Processing done in command (here).
+          # Scheme 01: returns array. Uses old callable_relation. Processing done in command (here).
           #
           # puts "Update#execute SELF:"
           # puts self.inspect
@@ -30,10 +34,10 @@ module ROM
           # puts source.inspect rescue $!
           #relation.map {|tuple| callable_relation.update(tuple['record_id'], attributes) }
           
-          # Newest scheme: returns loaded relation. Uses newer callable_realtion. Processing done in relation.
+          # Scheme 03: returns loaded relation. Uses newer callable_realtion. Processing done in relation.
           #callable_relation.update(attributes)
           
-          # Newer (middle) scheme. Returns source relation with loaded dataset. Uses newer callable_relation. Processing done in command.
+          # Scheme 02. Returns source relation with loaded dataset. Uses newer callable_relation. Processing done in command.
           # relation.inject(Dataset.new([])) do |initial, tuple|
           #   new_relation = callable_relation.update(tuple['record_id'], attributes)
           #   new_dataset = new_relation.dataset

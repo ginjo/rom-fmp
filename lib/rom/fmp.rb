@@ -14,6 +14,7 @@ require "rom/fmp/dataset"
 require "rom/fmp/gateway"
 require "rom/fmp/commands"
 require "rom/fmp/relation"
+require "rom/fmp/rfm/layout"
 #require "rom/fmp/rfm/resultset"
 
 #require "rom/fmp/mini"
