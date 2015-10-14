@@ -13,11 +13,9 @@ module ROM
       adapter :fmp
 
       #forward :find, :all, :count, :create, :update, :delete
-      forward :find, :all, :count, :create
+      forward :find, :all, :create
       
-      
-      # TODO: Enhance crud methods in dataset, to handle multiple ids, records, etc.
-      
+            
       def update(attributes)
         #collect{|r| dataset.update(r['record_id'], attributes).first}
         dataset.update(attributes, self.to_a)
@@ -28,6 +26,9 @@ module ROM
         dataset.delete(self.to_a)
       end
       
+      def count
+        dataset.count
+      end
             
     end
     
