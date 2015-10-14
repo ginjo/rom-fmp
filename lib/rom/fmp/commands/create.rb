@@ -10,7 +10,8 @@ module ROM
         adapter :fmp
 
         def execute(*tuples)
-          tuples.flatten(1).map { |tuple| callable_relation.dataset.create(tuple).first }
+          #tuples.flatten(1).map { |tuple| callable_relation.dataset.create(tuple).first }
+          callable_relation.dataset.create(*tuples)
         end
 
       end

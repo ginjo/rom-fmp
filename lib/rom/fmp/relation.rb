@@ -19,11 +19,13 @@ module ROM
       # TODO: Enhance crud methods in dataset, to handle multiple ids, records, etc.
       
       def update(attributes)
-        collect{|r| dataset.update(r['record_id'], attributes).first}
+        #collect{|r| dataset.update(r['record_id'], attributes).first}
+        dataset.update(attributes, self.to_a)
       end
       
       def delete
-        collect{|r| dataset.delete(r['record_id']).first}
+        #collect{|r| dataset.delete(r['record_id']).first}
+        dataset.delete(self.to_a)
       end
       
             

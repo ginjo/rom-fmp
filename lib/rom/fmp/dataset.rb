@@ -82,14 +82,17 @@ module ROM
         compiled_query.any? ? layout.count(*compiled_query) : layout.total_count
       end
       
-      # Create a single record.
-      def create(attributes={})
-        puts "Would create #{layout.name} with #{attributes}, but instead will just find\n"
-        #get_results(:create, [attributes])
-        get_results(:any, {})
+      # Create one or more records from tuples.
+      def create(*args)
+        tuples = args.flatten
+        tuples.collect do |tuple|
+          puts "Would create #{layout.name} with #{tuple}, but instead will just find\n"
+          #get_results(:create, [tuple])
+          get_results(:any, {}).first
+        end
       end
 
-      # Update single record (see relation for multi-record updates).
+      # Update one or more records given attributes and id-or-record list (any order!).
       def update(*args)
         attributes = case
         when args.last.is_a?(Hash); args.pop
@@ -103,10 +106,8 @@ module ROM
         when args.empty?; attributes.delete(FMPID)
         else args.collect{|a| a.is_a?(Hash) ? a[FMPID] : a.to_s }
         end
-        
-        puts "DATASET#update attributes: #{attributes}"
-        puts "DATASET#update ids: #{ids}"
-        
+        #puts "DATASET#update attributes: #{attributes}"
+        #puts "DATASET#update ids: #{ids}"
         ids.collect do |id|
           puts "Would update #{id} with #{attributes}, but instead will just find\n"
           #get_results(:edit, [id, attributes])
@@ -114,11 +115,14 @@ module ROM
         end
       end
 
-      # Delete single record. 
-      def delete(id)
-        puts "Would delete #{id}, but instead will just find\n"
-        #get_results(:delete, id)
-        get_results(:find, id)
+      # Delete one or more records given id-or-record list. 
+      def delete(*args)
+        ids = args.flatten.collect{|a| a.is_a?(Hash) ? a[FMPID] : a.to_s }
+        ids.collect do |id|
+          puts "Would delete #{id}, but instead will just find\n"
+          #get_results(:delete, id)
+          get_results(:find, id)
+        end
       end      
 
 
