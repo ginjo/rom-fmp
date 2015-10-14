@@ -75,17 +75,20 @@ module ROM
       end
       private :all
       
+      # Performs a standard query but returns count of results instead of restulset.
       def count(*args)
         compiled_query = self.class.compile_query(queries)
         compiled_query.any? ? layout.count(*compiled_query) : layout.total_count
       end
       
+      # Create a single record.
       def create(attributes={})
         puts "Would create #{layout.name} with #{attributes}, but instead will just find\n"
         #get_results(:create, [attributes])
         get_results(:any, {})
       end
 
+      # Update single record (see relation for multi-record updates).
       def update(*args)
         attributes = args.last.is_a?(Hash) ? args.pop : {}
         record_id = args[0] || [:id, :record_id, 'id', 'record_id'].find {|x| attributes.delete(x)}
@@ -94,6 +97,7 @@ module ROM
         get_results(:find, record_id)
       end
 
+      # Delete single record. 
       def delete(record_id)
         puts "Would delete #{record_id}, but instead will just find\n"
         #get_results(:delete, record_id)
@@ -107,6 +111,7 @@ module ROM
       def to_a
         (data.is_a?(::Rfm::Layout) || data.empty?) ? call.data.to_a : data.to_a
       end
+      #alias_method :to_ary, :to_a
       
       # Triggers actual fm action.
       def each

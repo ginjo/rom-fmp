@@ -10,8 +10,6 @@ module ROM
         adapter :fmp
 
         def execute(*tuples)
-          # TODO: make this like Update, so returns updated data,
-          # and works with loaded relations.
           tuples.flatten(1).map { |tuple| callable_relation.create(tuple).one }
         end
 

@@ -12,13 +12,9 @@ module ROM
       # we must configure adapter identifier here
       adapter :fmp
 
-      #forward :find, :all, :count, :create, :update, :delete
-      forward :find, :all, :count, :create, :delete
-      
-      def update
-        Commands::Update.new(self)
-      end
-      
+      forward :find, :all, :count, :create, :update, :delete
+      #forward :find, :all, :count, :create, :delete
+            
     end
     
   end

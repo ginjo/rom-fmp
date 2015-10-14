@@ -9,9 +9,7 @@ module ROM
         
         adapter :fmp
 
-        def execute   
-          # TODO: make this like Update, so returns updated data,
-          # and works with loaded relations.       
+        def execute  
           relation.map { |tuple| callable_relation.delete(tuple['record_id']).one }
         end
         
