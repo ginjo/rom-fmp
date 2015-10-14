@@ -12,8 +12,20 @@ module ROM
       # we must configure adapter identifier here
       adapter :fmp
 
-      forward :find, :all, :count, :create, :update, :delete
-      #forward :find, :all, :count, :create, :delete
+      #forward :find, :all, :count, :create, :update, :delete
+      forward :find, :all, :count, :create
+      
+      
+      # TODO: Enhance crud methods in dataset, to handle multiple ids, records, etc.
+      
+      def update(attributes)
+        collect{|r| dataset.update(r['record_id'], attributes).first}
+      end
+      
+      def delete
+        collect{|r| dataset.delete(r['record_id']).first}
+      end
+      
             
     end
     

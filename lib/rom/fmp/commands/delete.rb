@@ -10,7 +10,7 @@ module ROM
         adapter :fmp
 
         def execute  
-          relation.map { |tuple| callable_relation.delete(tuple['record_id']).one }
+          relation.map { |tuple| callable_relation.dataset.delete(tuple['record_id']).first }
         end
         
       end

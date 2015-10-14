@@ -10,9 +10,12 @@ module ROM
         adapter :fmp
         
         def execute(attributes)
+
+          # Scheme 06: Returns array, always. Uses smart Relation#update to handle multi-record update.
+          #callable_relation.update(attributes).to_a
         
           # Scheme 05: Returns array, always. Uses dumb Relation#update.
-          relation.map{|tuple| callable_relation.update(tuple['record_id'], attributes).one }
+          relation.map{|tuple| callable_relation.dataset.update(tuple['record_id'], attributes).first }
                 
           # Scheme 01: returns array. Uses old callable_relation. Processing done in command (here).
           #
