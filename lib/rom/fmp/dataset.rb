@@ -86,9 +86,9 @@ module ROM
       def create(*args)
         tuples = args.flatten
         tuples.collect do |tuple|
-          puts "Would create #{layout.name} with #{tuple}, but instead will just find\n"
-          #get_results(:create, [tuple])
-          get_results(:any, {}).first
+          #puts "Would create #{layout.name} with #{tuple}, but instead will just find\n"
+          #get_results(:any, {}).first
+          get_results(:create, [tuple]).first
         end
       end
 
@@ -109,9 +109,9 @@ module ROM
         #puts "DATASET#update attributes: #{attributes}"
         #puts "DATASET#update ids: #{ids}"
         ids.collect do |id|
-          puts "Would update #{id} with #{attributes}, but instead will just find\n"
-          #get_results(:edit, [id, attributes])
-          get_results(:find, id).first
+          #puts "Would update #{id} with #{attributes}, but instead will just find\n"
+          #get_results(:find, id).first
+          get_results(:edit, [id, attributes]).first
         end
       end
 
@@ -119,9 +119,9 @@ module ROM
       def delete(*args)
         ids = args.flatten.collect{|a| a.is_a?(Hash) ? a[FMPID] : a.to_s }
         ids.collect do |id|
-          puts "Would delete #{id}, but instead will just find\n"
-          #get_results(:delete, id)
-          get_results(:find, id)
+          #puts "Would delete #{id}, but instead will just find\n"
+          #get_results(:find, id)
+          get_results(:delete, id).first
         end
       end      
 
