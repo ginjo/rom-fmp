@@ -61,6 +61,10 @@ elements:
   #attach: [array, 'Rfm::Record', new, object]
   attach: [array, 'Hash', new]
   attach_attributes: hash
+  attributes:
+  - name: mod_id
+  - name: record_id
+    as_name: fmp_record_id
   compact: true
   #before_close: '@loaded=true'
   elements:

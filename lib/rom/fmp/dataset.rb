@@ -8,6 +8,7 @@ module ROM
   module FMP
     
     class Dataset
+      FMPID = 'fmp_record_id'
       # This was used but is not now.
       #include ArrayDataset
       
@@ -90,18 +91,34 @@ module ROM
 
       # Update single record (see relation for multi-record updates).
       def update(*args)
-        attributes = args.last.is_a?(Hash) ? args.pop : {}
-        record_id = args[0] || [:id, :record_id, 'id', 'record_id'].find {|x| attributes.delete(x)}
-        puts "Would update #{record_id} with #{attributes}, but instead will just find\n"
-        #get_results(:edit, [record_id, attributes])
-        get_results(:find, record_id)
+        attributes = case
+        when args.last.is_a?(Hash); args.pop
+        when args.first.is_a?(Hash); args.shift
+        else raise("Dateset#update requires an attribute hash.")
+        end
+        
+        args = args.flatten
+        
+        ids = case
+        when args.empty?; attributes.delete(FMPID)
+        else args.collect{|a| a.is_a?(Hash) ? a[FMPID] : a.to_s }
+        end
+        
+        puts "DATASET#update attributes: #{attributes}"
+        puts "DATASET#update ids: #{ids}"
+        
+        ids.collect do |id|
+          puts "Would update #{id} with #{attributes}, but instead will just find\n"
+          #get_results(:edit, [id, attributes])
+          get_results(:find, id).first
+        end
       end
 
       # Delete single record. 
-      def delete(record_id)
-        puts "Would delete #{record_id}, but instead will just find\n"
-        #get_results(:delete, record_id)
-        get_results(:find, record_id)
+      def delete(id)
+        puts "Would delete #{id}, but instead will just find\n"
+        #get_results(:delete, id)
+        get_results(:find, id)
       end      
 
 
